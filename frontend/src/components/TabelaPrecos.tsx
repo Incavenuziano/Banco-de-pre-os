@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { ListarPrecosResponse } from "../api/analise";
+import type { ListarPrecosResponse, PrecoItem } from "../api/analise";
 
 export type CampoOrdenacao = "preco" | "data";
 export type DirecaoOrdenacao = "asc" | "desc";
@@ -21,6 +21,8 @@ interface TabelaPrecosProps {
   ordemAtual?: DirecaoOrdenacao;
   /** Callback ao clicar em coluna ordenável */
   onOrdenar?: (campo: CampoOrdenacao, direcao: DirecaoOrdenacao) => void;
+  /** Callback ao clicar em "ver histórico" de um item */
+  onVerHistorico?: (item: PrecoItem) => void;
 }
 
 const CONFIANCA_CLASSES: Record<string, string> = {
@@ -68,6 +70,7 @@ export const TabelaPrecos: React.FC<TabelaPrecosProps> = ({
   ordenarPor,
   ordemAtual = "desc",
   onOrdenar,
+  onVerHistorico,
 }) => {
   /** Ao clicar numa coluna ordenável: alterna direção se já ativa, senão ativa desc */
   function handleSort(campo: CampoOrdenacao) {
@@ -178,6 +181,11 @@ export const TabelaPrecos: React.FC<TabelaPrecosProps> = ({
                 <SortIcon campo="data" ordenarPor={ordenarPor} ordemAtual={ordemAtual} />
               </th>
 
+              {/* Tipo preço */}
+              <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Tipo
+              </th>
+
               {/* Colunas finais */}
               {["Órgão", "Contratação", "Confiança"].map((col) => (
                 <th
@@ -187,6 +195,11 @@ export const TabelaPrecos: React.FC<TabelaPrecosProps> = ({
                   {col}
                 </th>
               ))}
+              {onVerHistorico && (
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Histórico
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -210,6 +223,18 @@ export const TabelaPrecos: React.FC<TabelaPrecosProps> = ({
                 )}
                 <td className="px-3 py-2 text-gray-600">{item.unidade}</td>
                 <td className="px-3 py-2 text-gray-600">{formatarData(item.data_referencia)}</td>
+                <td className="px-3 py-2">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      item.tipo_preco === "homologado"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                    data-testid="badge-tipo-preco"
+                  >
+                    {item.tipo_preco === "homologado" ? "Homologado" : "Estimado"}
+                  </span>
+                </td>
                 <td className="max-w-[150px] truncate px-3 py-2 text-gray-600" title={item.orgao}>
                   {item.orgao}
                 </td>
@@ -238,6 +263,18 @@ export const TabelaPrecos: React.FC<TabelaPrecosProps> = ({
                     {item.confianca}
                   </span>
                 </td>
+                {onVerHistorico && (
+                  <td className="px-3 py-2">
+                    <button
+                      onClick={() => onVerHistorico(item)}
+                      className="rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-800"
+                      data-testid="btn-historico"
+                      title="Ver histórico de preços"
+                    >
+                      📈
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

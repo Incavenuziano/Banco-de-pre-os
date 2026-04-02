@@ -16,6 +16,7 @@ import type {
   ComparativoResponse,
   ListarPrecosResponse,
   FiltrosPrecos,
+  PrecoItem,
 } from "../api/analise";
 
 import { KPICard } from "../components/KPICard";
@@ -30,6 +31,7 @@ import { ErroAlerta } from "../components/ErroAlerta";
 import { IndicadorIPCA } from "../components/IndicadorIPCA";
 import { BuscaSemantica } from "../components/BuscaSemantica";
 import { BenchmarkRegional } from "../components/BenchmarkRegional";
+import { ModalHistoricoPrecos } from "../components/ModalHistoricoPrecos";
 import type { BenchmarkUFResponse } from "../api/analise";
 
 const CATEGORIA_PADRAO = "Papel A4";
@@ -62,6 +64,9 @@ export const Dashboard: React.FC = () => {
 
   // Benchmark regional
   const [benchmark, setBenchmark] = useState<BenchmarkUFResponse | null>(null);
+
+  // Modal histórico
+  const [itemHistorico, setItemHistorico] = useState<PrecoItem | null>(null);
 
   // Estados de erro
   const [erroDash, setErroDash] = useState<string | null>(null);
@@ -182,13 +187,22 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900">
-            📊 Banco de Preços — Dashboard de Análise
-          </h1>
-          <p className="mt-0.5 text-sm text-gray-500">
-            Análise de preços públicos por UF e categoria · 15 UFs validadas
-          </p>
+        <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">
+              Banco de Precos — Dashboard de Analise
+            </h1>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Analise de precos publicos por UF e categoria
+            </p>
+          </div>
+          <a
+            href="#/comparar"
+            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            data-testid="link-comparar"
+          >
+            Comparar Item
+          </a>
         </div>
       </header>
 
@@ -301,9 +315,18 @@ export const Dashboard: React.FC = () => {
             ordenarPor={ordenarPor}
             ordemAtual={ordemAtual}
             onOrdenar={handleOrdenar}
+            onVerHistorico={setItemHistorico}
           />
         </div>
       </main>
+
+      {itemHistorico && (
+        <ModalHistoricoPrecos
+          descricao={itemHistorico.descricao}
+          uf={itemHistorico.uf}
+          onFechar={() => setItemHistorico(null)}
+        />
+      )}
 
       <footer className="mt-8 border-t border-gray-200 bg-white py-4 text-center text-xs text-gray-400">
         Banco de Preços v0.9 · Semana 14 · Dados públicos — PNCP / ComprasGov
