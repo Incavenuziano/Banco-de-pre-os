@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # Configuração
 # ─────────────────────────────────────────────────────────
 
-CONSULT_URL = "https://pncp.gov.br/api/consulta/v1/contratacoes/proposta"
+CONSULT_URL = "https://pncp.gov.br/api/consulta/v1/contratacoes/publicacao"
 ITEMS_URL_TPL = "https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens"
 RESULTADO_URL_TPL = "https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens/{item}/resultado"
 
@@ -51,7 +51,7 @@ HEADERS = {
 
 # Modalidades de interesse para banco de preços
 # 6=Pregão Eletrônico, 8=Dispensa Eletrônica
-MODALIDADES = [6, 8]
+MODALIDADES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]  # todas as modalidades PNCP
 
 # Situações com preço homologado (1=Divulgada, 2=Homologada)
 # Vamos pegar as duas e filtrar pelos itens com resultado
@@ -62,9 +62,9 @@ DB_DSN = os.getenv(
     "postgresql://bancodeprecos:bancodeprecos_dev@localhost:5435/bancodeprecos"
 )
 
-TIMEOUT_API = 20  # segundos
+TIMEOUT_API = 60  # segundos
 PAGE_SIZE = 50
-MAX_PAGES_POR_UF = 200  # limite de segurança por run
+MAX_PAGES_POR_UF = 2000  # limite de segurança por run
 SLEEP_ENTRE_PAGINAS = 0.5  # segundos (evitar rate limit)
 SLEEP_ENTRE_ITENS = 0.2
 
@@ -129,6 +129,7 @@ class ItemRaw:
     valor_unitario: float | None
     valor_total: float | None
     catmat: str | None
+    tipo_preco: str = "estimado"
 
 
 @dataclass
@@ -184,7 +185,7 @@ def buscar_contratacoes_uf(
             "dataInicial": data_inicio,
             "dataFinal": data_fim,
             "codigoModalidadeContratacao": modalidade,
-            "codigoUf": uf,
+            "uf": uf,
             "situacao": situacao,
             "pagina": pagina,
             "tamanhoPagina": PAGE_SIZE,
@@ -197,10 +198,8 @@ def buscar_contratacoes_uf(
             org = item.get("orgaoEntidade") or {}
             un = item.get("unidadeOrgao") or {}
 
-            # Filtrar apenas municípios (esfera M)
+            # Aceitar todas as esferas (M=municipal, E=estadual, F=federal)
             esfera = org.get("esferaId", "")
-            if esfera != "M":
-                continue
 
             # Filtrar UF
             uf_item = un.get("ufSigla", "")
@@ -239,7 +238,7 @@ def buscar_contratacoes_uf(
 
 
 def buscar_itens(cnpj: str, ano: int, seq: int) -> list[ItemRaw]:
-    """Busca itens de uma contratação."""
+    """Busca itens de uma contratação, incluindo resultado homologado."""
     url = ITEMS_URL_TPL.format(cnpj=cnpj, ano=ano, seq=seq)
     data = _get_json(url)
     if not data:
@@ -250,14 +249,36 @@ def buscar_itens(cnpj: str, ano: int, seq: int) -> list[ItemRaw]:
     items_list = data if isinstance(data, list) else data.get("data", [])
 
     for it in items_list:
+        numero_item = int(it.get("numeroItem", 0))
+        valor_unitario = _float_safe(it.get("valorUnitarioEstimado"))
+        tipo_preco = "estimado"
+
+        # Tentar buscar resultado homologado
+        try:
+            resultado_url = RESULTADO_URL_TPL.format(
+                cnpj=cnpj, ano=ano, seq=seq, item=numero_item
+            )
+            resultado = _get_json(resultado_url, max_retries=1)
+            if resultado:
+                items_resultado = resultado if isinstance(resultado, list) else [resultado]
+                for r in items_resultado:
+                    vh = _float_safe(r.get("valorUnitarioHomologado"))
+                    if vh and vh > 0:
+                        valor_unitario = vh
+                        tipo_preco = "homologado"
+                        break
+        except Exception:
+            pass
+
         itens.append(ItemRaw(
-            numero_item=int(it.get("numeroItem", 0)),
+            numero_item=numero_item,
             descricao=(it.get("descricao") or "")[:2000],
             quantidade=_float_safe(it.get("quantidade")),
             unidade=it.get("unidadeMedida", {}).get("nomeUnidadeMedida") if isinstance(it.get("unidadeMedida"), dict) else it.get("unidadeMedida"),
-            valor_unitario=_float_safe(it.get("valorUnitarioEstimado")),
+            valor_unitario=valor_unitario,
             valor_total=_float_safe(it.get("valorTotal")),
             catmat=it.get("catalogoAquisicao", {}).get("codigo") if isinstance(it.get("catalogoAquisicao"), dict) else None,
+            tipo_preco=tipo_preco,
         ))
         time.sleep(SLEEP_ENTRE_ITENS)
 
@@ -321,13 +342,15 @@ def upsert_contratacao(cur, orgao_id: str, contratacao: ContratacaoRaw) -> tuple
 def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
     """Insere itens (skip duplicados por contratacao_id + numero_item)."""
     novos = 0
+    novos_ids: list[tuple[str, str]] = []  # (item_id, descricao)
     for it in itens:
         cur.execute("""
             INSERT INTO itens
                 (contratacao_id, numero_item, descricao, quantidade,
-                 unidade, valor_unitario, valor_total, catmat_catser)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                 unidade, valor_unitario, valor_total, catmat_catser, tipo_preco)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING
+            RETURNING id
         """, (
             contratacao_id,
             it.numero_item,
@@ -337,10 +360,44 @@ def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
             it.valor_unitario,
             it.valor_total,
             it.catmat,
+            it.tipo_preco,
         ))
         if cur.rowcount > 0:
             novos += 1
+            row = cur.fetchone()
+            if row:
+                novos_ids.append((str(row[0]), it.descricao or ""))
+
+    # Classificar novos itens automaticamente
+    if novos_ids:
+        _classificar_itens_novos(cur, novos_ids)
+
     return novos
+
+
+def _classificar_itens_novos(cur, itens: list[tuple[str, str]]) -> None:
+    """Classifica itens recém-inseridos usando ClassificadorRegex."""
+    try:
+        from app.services.classificador_regex import ClassificadorRegex
+
+        # Carregar categorias
+        cur.execute("SELECT id, nome FROM categorias")
+        categorias = [{"id": str(r[0]), "nome": r[1]} for r in cur.fetchall()]
+        cat_map = {c["nome"]: c["id"] for c in categorias}
+        classificador = ClassificadorRegex(categorias)
+
+        for item_id, descricao in itens:
+            resultado = classificador.classificar(descricao)
+            if resultado and resultado.get("score", 0) >= 0.5:
+                cat_id = resultado.get("categoria_id") or cat_map.get(resultado["categoria_nome"])
+                if cat_id:
+                    cur.execute("""
+                        INSERT INTO item_categoria (item_id, categoria_id, score_confianca, metodo_classificacao)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (item_id, categoria_id) DO NOTHING
+                    """, (item_id, str(cat_id), resultado["score"], resultado["metodo"]))
+    except Exception as e:
+        logger.warning("Erro ao classificar itens: %s", e)
 
 
 # ─────────────────────────────────────────────────────────
@@ -408,15 +465,26 @@ def coletar_uf(
     dias: int = 30,
     dry_run: bool = False,
     dsn: str = DB_DSN,
+    data_inicio_str: str | None = None,
+    data_fim_str: str | None = None,
 ) -> ResultadoColeta:
-    """Coleta contratações municipais de uma UF e persiste no banco."""
+    """Coleta contratações municipais de uma UF e persiste no banco.
+
+    Args:
+        data_inicio_str: data no formato YYYY-MM-DD (sobrescreve --dias)
+        data_fim_str: data no formato YYYY-MM-DD (sobrescreve --dias)
+    """
     inicio = time.time()
     resultado = ResultadoColeta(uf=uf)
 
-    data_fim = datetime.now(timezone.utc)
-    data_inicio = data_fim - timedelta(days=dias)
-    str_inicio = data_inicio.strftime("%Y%m%d")
-    str_fim = data_fim.strftime("%Y%m%d")
+    if data_inicio_str and data_fim_str:
+        str_inicio = data_inicio_str.replace("-", "")
+        str_fim = data_fim_str.replace("-", "")
+    else:
+        data_fim = datetime.now(timezone.utc)
+        data_inicio = data_fim - timedelta(days=dias)
+        str_inicio = data_inicio.strftime("%Y%m%d")
+        str_fim = data_fim.strftime("%Y%m%d")
 
     logger.info("Iniciando coleta UF=%s período=%s→%s dry_run=%s", uf, str_inicio, str_fim, dry_run)
 
@@ -508,10 +576,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Coletor PNCP municipal")
     parser.add_argument("--uf", default="GO", help="Sigla da UF (default: GO)")
     parser.add_argument("--dias", type=int, default=30, help="Janela em dias (default: 30)")
+    parser.add_argument("--data-inicio", default=None, help="Data inicial YYYY-MM-DD (sobrescreve --dias)")
+    parser.add_argument("--data-fim", default=None, help="Data final YYYY-MM-DD (sobrescreve --dias)")
     parser.add_argument("--dry-run", action="store_true", help="Não persiste, apenas loga")
     args = parser.parse_args()
 
-    resultado = coletar_uf(args.uf, args.dias, args.dry_run)
+    resultado = coletar_uf(
+        args.uf,
+        args.dias,
+        args.dry_run,
+        data_inicio_str=args.data_inicio,
+        data_fim_str=args.data_fim,
+    )
     print(f"\n{'='*60}")
     print(f"UF: {resultado.uf}")
     print(f"Contratações coletadas: {resultado.total_contratacoes} ({resultado.novas_contratacoes} novas)")

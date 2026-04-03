@@ -148,7 +148,8 @@ class AnaliseService:
                     ct.data_publicacao       AS data_referencia,
                     o.razao_social           AS orgao,
                     fp.score_confianca       AS score_confianca,
-                    ct.numero_controle_pncp  AS numero_controle_pncp
+                    ct.numero_controle_pncp  AS numero_controle_pncp,
+                    COALESCE(fp.tipo_preco, 'estimado') AS tipo_preco
                 FROM fontes_preco fp
                 JOIN itens i          ON fp.item_id       = i.id
                 JOIN contratacoes ct  ON i.contratacao_id = ct.id
@@ -180,7 +181,8 @@ class AnaliseService:
                     ct.data_publicacao       AS data_referencia,
                     o.razao_social           AS orgao,
                     0.75::numeric            AS score_confianca,
-                    ct.numero_controle_pncp  AS numero_controle_pncp
+                    ct.numero_controle_pncp  AS numero_controle_pncp,
+                    COALESCE(i.tipo_preco, 'estimado') AS tipo_preco
                 FROM itens i
                 JOIN contratacoes ct ON i.contratacao_id = ct.id
                 JOIN orgaos o        ON ct.orgao_id      = o.id
@@ -293,6 +295,7 @@ class AnaliseService:
                     "confianca": confianca,
                     "numero_controle_pncp": numero_controle,
                     "pncp_url": pncp_url,
+                    "tipo_preco": getattr(r, "tipo_preco", "estimado") or "estimado",
                 })
 
             return {
@@ -490,63 +493,137 @@ class AnaliseService:
         ufs: list[str] | None = None,
         categoria: str | None = None,
     ) -> dict[str, Any]:
-        """Retorna resumo agregado para o dashboard principal."""
+        """Retorna resumo agregado para o dashboard principal.
+
+        Combina fontes_preco (processados) + itens PNCP diretos (sem fontes_preco)
+        para refletir o total real de dados coletados.
+        """
         db = _get_session()
         try:
             params: dict[str, Any] = {}
-            uf_filter = ""
+            uf_filter_fp = ""
+            uf_filter_o = ""
             cat_filter = ""
+            cat_filter_desc = ""
 
             if ufs:
                 ufs_ph = ", ".join(f":uf{i}" for i in range(len(ufs)))
-                uf_filter = f" AND fp.uf IN ({ufs_ph})"
+                uf_filter_fp = f" AND fp.uf IN ({ufs_ph})"
+                uf_filter_o = f" AND o.uf IN ({ufs_ph})"
                 for i, u in enumerate(ufs):
                     params[f"uf{i}"] = u.upper()
 
             if categoria:
                 cat_filter = " AND c.nome ILIKE :categoria"
+                cat_filter_desc = " AND i.descricao ILIKE :categoria"
                 params["categoria"] = f"%{categoria}%"
 
-            # KPIs gerais
+            # KPIs gerais — UNION de fontes_preco + itens diretos
             kpi_sql = f"""
                 SELECT
-                    COUNT(DISTINCT fp.id)   AS total_registros,
-                    COUNT(DISTINCT c.id)    AS total_categorias,
-                    COUNT(DISTINCT fp.uf)   AS total_ufs,
-                    MAX(fp.data_referencia) AS ultima_atualizacao
-                FROM fontes_preco fp
-                JOIN itens i          ON fp.item_id       = i.id
-                JOIN item_categoria ic ON i.id             = ic.item_id
-                JOIN categorias c     ON ic.categoria_id  = c.id
-                WHERE fp.ativo = true
-                  AND fp.outlier_flag = false
-                {uf_filter}
-                {cat_filter}
+                    COUNT(*)               AS total_registros,
+                    COUNT(DISTINCT uf)     AS total_ufs,
+                    MAX(data_ref)          AS ultima_atualizacao
+                FROM (
+                    SELECT
+                        fp.id,
+                        COALESCE(fp.uf, o.uf) AS uf,
+                        COALESCE(fp.data_referencia, ct.data_publicacao) AS data_ref
+                    FROM fontes_preco fp
+                    JOIN itens i          ON fp.item_id       = i.id
+                    JOIN contratacoes ct  ON i.contratacao_id  = ct.id
+                    JOIN orgaos o         ON ct.orgao_id       = o.id
+                    LEFT JOIN item_categoria ic ON i.id        = ic.item_id
+                    LEFT JOIN categorias c      ON ic.categoria_id = c.id
+                    WHERE fp.ativo = true
+                      AND fp.outlier_flag = false
+                      AND fp.preco_unitario IS NOT NULL
+                      AND fp.preco_unitario > 0
+                    {uf_filter_fp}
+                    {cat_filter}
+
+                    UNION ALL
+
+                    SELECT
+                        i.id,
+                        o.uf                 AS uf,
+                        ct.data_publicacao   AS data_ref
+                    FROM itens i
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o        ON ct.orgao_id      = o.id
+                    WHERE i.valor_unitario IS NOT NULL
+                      AND i.valor_unitario > 0
+                      AND NOT EXISTS (
+                          SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id
+                      )
+                    {uf_filter_o}
+                    {cat_filter_desc}
+                ) sub
             """
             kpi_row = db.execute(text(kpi_sql), params).fetchone()
 
             total_registros = kpi_row.total_registros or 0
-            total_categorias = kpi_row.total_categorias or 0
             total_ufs_db = kpi_row.total_ufs or 0
             ultima_att = kpi_row.ultima_atualizacao
 
-            # KPIs por UF
-            kpi_uf_sql = f"""
-                SELECT
-                    fp.uf,
-                    COUNT(fp.id)            AS total_itens,
-                    AVG(fp.preco_unitario)  AS media_preco,
-                    MAX(fp.data_referencia) AS ultima_atualizacao
+            # Total de categorias (apenas fontes_preco têm categorias mapeadas)
+            cat_sql = f"""
+                SELECT COUNT(DISTINCT c.id) AS total_categorias
                 FROM fontes_preco fp
                 JOIN itens i          ON fp.item_id       = i.id
                 JOIN item_categoria ic ON i.id             = ic.item_id
                 JOIN categorias c     ON ic.categoria_id  = c.id
                 WHERE fp.ativo = true
                   AND fp.outlier_flag = false
-                {uf_filter}
+                {uf_filter_fp}
                 {cat_filter}
-                GROUP BY fp.uf
-                ORDER BY fp.uf
+            """
+            total_categorias = db.execute(text(cat_sql), params).scalar() or 0
+
+            # KPIs por UF — UNION
+            kpi_uf_sql = f"""
+                SELECT
+                    uf,
+                    COUNT(*)          AS total_itens,
+                    AVG(preco)        AS media_preco,
+                    MAX(data_ref)     AS ultima_atualizacao
+                FROM (
+                    SELECT
+                        COALESCE(fp.uf, o.uf) AS uf,
+                        fp.preco_unitario      AS preco,
+                        COALESCE(fp.data_referencia, ct.data_publicacao) AS data_ref
+                    FROM fontes_preco fp
+                    JOIN itens i          ON fp.item_id       = i.id
+                    JOIN contratacoes ct  ON i.contratacao_id  = ct.id
+                    JOIN orgaos o         ON ct.orgao_id       = o.id
+                    LEFT JOIN item_categoria ic ON i.id        = ic.item_id
+                    LEFT JOIN categorias c      ON ic.categoria_id = c.id
+                    WHERE fp.ativo = true
+                      AND fp.outlier_flag = false
+                      AND fp.preco_unitario IS NOT NULL
+                      AND fp.preco_unitario > 0
+                    {uf_filter_fp}
+                    {cat_filter}
+
+                    UNION ALL
+
+                    SELECT
+                        o.uf                AS uf,
+                        i.valor_unitario    AS preco,
+                        ct.data_publicacao  AS data_ref
+                    FROM itens i
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o        ON ct.orgao_id      = o.id
+                    WHERE i.valor_unitario IS NOT NULL
+                      AND i.valor_unitario > 0
+                      AND NOT EXISTS (
+                          SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id
+                      )
+                    {uf_filter_o}
+                    {cat_filter_desc}
+                ) sub
+                GROUP BY uf
+                ORDER BY uf
             """
             uf_rows = db.execute(text(kpi_uf_sql), params).fetchall()
             kpis_por_uf = [
@@ -559,7 +636,7 @@ class AnaliseService:
                 for r in uf_rows
             ]
 
-            # Top 5 categorias
+            # Top 5 categorias (somente fontes_preco têm categorias)
             top_sql = f"""
                 SELECT
                     c.nome,
@@ -570,7 +647,7 @@ class AnaliseService:
                 JOIN categorias c     ON ic.categoria_id  = c.id
                 WHERE fp.ativo = true
                   AND fp.outlier_flag = false
-                {uf_filter}
+                {uf_filter_fp}
                 {cat_filter}
                 GROUP BY c.nome
                 ORDER BY n_registros DESC
@@ -652,6 +729,171 @@ class AnaliseService:
     # ------------------------------------------------------------------ #
     #  listar_categorias / listar_ufs                                      #
     # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ #
+    #  get_historico_item                                                   #
+    # ------------------------------------------------------------------ #
+    def get_historico_item(
+        self,
+        descricao: str,
+        uf: str | None = None,
+        limite: int = 100,
+    ) -> dict[str, Any]:
+        """Retorna histórico cronológico de preços para uma descrição de item."""
+        db = _get_session()
+        try:
+            params: dict[str, Any] = {"descricao": f"%{descricao}%", "limite": limite}
+
+            uf_filter = ""
+            if uf:
+                uf_filter = "AND o.uf = :uf"
+                params["uf"] = uf.upper()
+
+            sql = f"""
+                (
+                    SELECT
+                        fp.data_referencia                AS data,
+                        fp.preco_unitario                 AS preco,
+                        o.razao_social                    AS orgao,
+                        o.municipio                       AS municipio,
+                        o.uf                              AS uf,
+                        COALESCE(fp.url_origem, '')       AS pncp_url,
+                        COALESCE(fp.qualidade_tipo, 'ESTIMADO') AS tipo_preco
+                    FROM fontes_preco fp
+                    JOIN itens i          ON fp.item_id       = i.id
+                    JOIN contratacoes ct  ON i.contratacao_id  = ct.id
+                    JOIN orgaos o         ON ct.orgao_id       = o.id
+                    WHERE fp.ativo = true
+                      AND fp.preco_unitario IS NOT NULL
+                      AND fp.preco_unitario > 0
+                      AND i.descricao ILIKE :descricao
+                      {uf_filter}
+                )
+                UNION ALL
+                (
+                    SELECT
+                        ct.data_publicacao                AS data,
+                        i.valor_unitario                  AS preco,
+                        o.razao_social                    AS orgao,
+                        o.municipio                       AS municipio,
+                        o.uf                              AS uf,
+                        ''                                AS pncp_url,
+                        COALESCE(i.tipo_preco, 'estimado') AS tipo_preco
+                    FROM itens i
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o        ON ct.orgao_id      = o.id
+                    WHERE i.valor_unitario IS NOT NULL
+                      AND i.valor_unitario > 0
+                      AND i.descricao ILIKE :descricao
+                      AND NOT EXISTS (
+                          SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id
+                      )
+                      {uf_filter}
+                )
+                ORDER BY data DESC NULLS LAST
+                LIMIT :limite
+            """
+
+            rows = db.execute(text(sql), params).fetchall()
+
+            historico = []
+            for r in rows:
+                data_val = r.data
+                historico.append({
+                    "data": data_val.isoformat() if data_val else "",
+                    "preco": round(float(r.preco), 4) if r.preco else 0,
+                    "orgao": r.orgao or "",
+                    "municipio": r.municipio or "",
+                    "uf": r.uf or "",
+                    "pncp_url": r.pncp_url or "",
+                    "tipo_preco": (r.tipo_preco or "estimado").lower(),
+                })
+
+            return {
+                "descricao": descricao,
+                "total": len(historico),
+                "historico": historico,
+            }
+        finally:
+            db.close()
+
+    # ------------------------------------------------------------------ #
+    #  get_comparativo_item                                                #
+    # ------------------------------------------------------------------ #
+    def get_comparativo_item(
+        self,
+        descricao: str,
+        uf: str | None = None,
+    ) -> dict[str, Any]:
+        """Retorna comparativo de um item: histórico local + benchmark por UF."""
+        # Reutiliza histórico
+        hist = self.get_historico_item(descricao, uf=uf, limite=500)
+
+        db = _get_session()
+        try:
+            params: dict[str, Any] = {"descricao": f"%{descricao}%"}
+
+            # Benchmark por UF — agrega dados de todas as fontes
+            sql_bench = """
+                SELECT
+                    sub.uf,
+                    AVG(sub.preco) AS media,
+                    MIN(sub.preco) AS min,
+                    MAX(sub.preco) AS max,
+                    COUNT(*)       AS count
+                FROM (
+                    SELECT o.uf, fp.preco_unitario AS preco
+                    FROM fontes_preco fp
+                    JOIN itens i ON fp.item_id = i.id
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o ON ct.orgao_id = o.id
+                    WHERE fp.ativo = true
+                      AND fp.preco_unitario > 0
+                      AND i.descricao ILIKE :descricao
+
+                    UNION ALL
+
+                    SELECT o.uf, i.valor_unitario AS preco
+                    FROM itens i
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o ON ct.orgao_id = o.id
+                    WHERE i.valor_unitario > 0
+                      AND i.descricao ILIKE :descricao
+                      AND NOT EXISTS (SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id)
+                ) sub
+                GROUP BY sub.uf
+                ORDER BY sub.uf
+            """
+            rows = db.execute(text(sql_bench), params).fetchall()
+
+            benchmark_por_uf: dict[str, dict] = {}
+            all_precos: list[float] = []
+            for r in rows:
+                media = round(float(r.media), 4)
+                benchmark_por_uf[r.uf] = {
+                    "media": media,
+                    "min": round(float(r.min), 4),
+                    "max": round(float(r.max), 4),
+                    "count": r.count,
+                }
+                all_precos.extend([media] * r.count)
+
+            media_geral = round(statistics.mean(all_precos), 4) if all_precos else 0.0
+            mediana = round(statistics.median(all_precos), 4) if all_precos else 0.0
+            desvio = round(statistics.stdev(all_precos), 4) if len(all_precos) >= 2 else 0.0
+
+            return {
+                "descricao": descricao,
+                "historico_local": hist["historico"],
+                "benchmark_por_uf": benchmark_por_uf,
+                "estatisticas": {
+                    "media_geral": media_geral,
+                    "mediana": mediana,
+                    "desvio_padrao": desvio,
+                },
+            }
+        finally:
+            db.close()
+
     def listar_categorias(self) -> list[dict[str, Any]]:
         """Lista categorias disponíveis no banco com contagem de registros."""
         db = _get_session()
@@ -704,21 +946,47 @@ class AnaliseService:
             db.close()
 
     def listar_ufs(self) -> list[dict[str, Any]]:
-        """Lista UFs com dados no banco e contagem de registros."""
+        """Lista UFs com dados no banco e contagem de registros.
+
+        Combina fontes_preco + itens PNCP diretos para contagem total.
+        """
         db = _get_session()
         try:
             sql = """
                 SELECT
-                    fp.uf,
-                    COUNT(DISTINCT ic.categoria_id) AS n_categorias,
-                    COUNT(fp.id)                    AS n_registros,
-                    'VALIDADA'                      AS status
-                FROM fontes_preco fp
-                JOIN itens i          ON fp.item_id = i.id
-                JOIN item_categoria ic ON i.id = ic.item_id
-                WHERE fp.ativo = true
-                GROUP BY fp.uf
-                ORDER BY fp.uf
+                    uf,
+                    SUM(n_categorias) AS n_categorias,
+                    SUM(n_registros)  AS n_registros,
+                    'VALIDADA'        AS status
+                FROM (
+                    SELECT
+                        fp.uf,
+                        COUNT(DISTINCT ic.categoria_id) AS n_categorias,
+                        COUNT(fp.id)                    AS n_registros
+                    FROM fontes_preco fp
+                    JOIN itens i           ON fp.item_id = i.id
+                    LEFT JOIN item_categoria ic ON i.id = ic.item_id
+                    WHERE fp.ativo = true
+                    GROUP BY fp.uf
+
+                    UNION ALL
+
+                    SELECT
+                        o.uf,
+                        0                    AS n_categorias,
+                        COUNT(i.id)          AS n_registros
+                    FROM itens i
+                    JOIN contratacoes ct ON i.contratacao_id = ct.id
+                    JOIN orgaos o        ON ct.orgao_id      = o.id
+                    WHERE i.valor_unitario IS NOT NULL
+                      AND i.valor_unitario > 0
+                      AND NOT EXISTS (
+                          SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id
+                      )
+                    GROUP BY o.uf
+                ) sub
+                GROUP BY uf
+                ORDER BY uf
             """
             rows = db.execute(text(sql)).fetchall()
             return [

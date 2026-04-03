@@ -19,6 +19,8 @@ export interface PrecoItem {
   numero_controle_pncp?: string;
   /** URL direta para o edital no PNCP */
   pncp_url?: string;
+  /** Tipo de preço: estimado ou homologado */
+  tipo_preco?: string;
 }
 
 export interface ListarPrecosResponse {
@@ -152,6 +154,36 @@ export interface BenchmarkUFResponse {
   total_ufs: number;
 }
 
+export interface HistoricoItemEntry {
+  data: string;
+  preco: number;
+  orgao: string;
+  municipio: string;
+  uf: string;
+  pncp_url: string;
+  tipo_preco: string;
+}
+
+export interface HistoricoItemResponse {
+  descricao: string;
+  total: number;
+  historico: HistoricoItemEntry[];
+}
+
+export interface ComparativoItemResponse {
+  descricao: string;
+  historico_local: HistoricoItemEntry[];
+  benchmark_por_uf: Record<
+    string,
+    { media: number; min: number; max: number; count: number }
+  >;
+  estatisticas: {
+    media_geral: number;
+    mediana: number;
+    desvio_padrao: number;
+  };
+}
+
 export interface BenchmarkEvolucaoResponse {
   categoria: string;
   ufs: string[];
@@ -218,6 +250,20 @@ export const analiseAPI = {
   /** Benchmark regional: evolução temporal. */
   obterBenchmarkEvolucao: (categoria: string, ufs?: string[], meses?: number) =>
     fetchJSON<BenchmarkEvolucaoResponse>(`${API_BASE}/analise/benchmark/evolucao`, { categoria, ufs, meses }),
+
+  /** Histórico de preços de um item. */
+  getHistoricoItem: (descricao: string, uf?: string, limite?: number) =>
+    fetchJSON<import("./analise").HistoricoItemResponse>(
+      `${API_BASE}/analise/historico`,
+      { descricao, uf, limite },
+    ),
+
+  /** Comparativo de item por UF. */
+  getComparativoItem: (descricao: string, uf?: string) =>
+    fetchJSON<import("./analise").ComparativoItemResponse>(
+      `${API_BASE}/analise/comparativo-item`,
+      { descricao, uf },
+    ),
 
   /** Retorna URL de exportação CSV com filtros. */
   urlExportarCSV: (filtros?: FiltrosPrecos): string => {

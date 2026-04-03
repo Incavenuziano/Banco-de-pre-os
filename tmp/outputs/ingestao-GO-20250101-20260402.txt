@@ -1,0 +1,186 @@
+2026-04-02 11:06:38,995 INFO Iniciando coleta UF=GO período=20250101→20260402 dry_run=False
+2026-04-02 11:06:39,166 INFO UF=GO modalidade=1 página 1/1 — 0 contratos coletados
+2026-04-02 11:06:39,166 INFO Modalidade 1: 0 contratações municipais
+2026-04-02 11:06:39,321 INFO Modalidade 2: 0 contratações municipais
+2026-04-02 11:06:39,480 INFO Modalidade 3: 0 contratações municipais
+2026-04-02 11:06:59,613 WARNING Timeout https://pncp.gov.br/api/consulta/v1/contratacoes/proposta (tentativa 1)
+2026-04-02 11:07:20,755 WARNING Timeout https://pncp.gov.br/api/consulta/v1/contratacoes/proposta (tentativa 2)
+2026-04-02 11:07:23,032 INFO UF=GO modalidade=4 página 1/1 — 2 contratos coletados
+2026-04-02 11:07:23,032 INFO Modalidade 4: 2 contratações municipais
+2026-04-02 11:07:23,255 INFO UF=GO modalidade=5 página 1/1 — 0 contratos coletados
+2026-04-02 11:07:23,255 INFO Modalidade 5: 0 contratações municipais
+2026-04-02 11:07:23,643 INFO UF=GO modalidade=6 página 1/3 — 1 contratos coletados
+2026-04-02 11:07:24,545 INFO UF=GO modalidade=6 página 2/3 — 4 contratos coletados
+2026-04-02 11:07:25,218 INFO UF=GO modalidade=6 página 3/3 — 4 contratos coletados
+2026-04-02 11:07:25,218 INFO Modalidade 6: 4 contratações municipais
+2026-04-02 11:07:25,439 INFO UF=GO modalidade=7 página 1/1 — 0 contratos coletados
+2026-04-02 11:07:25,439 INFO Modalidade 7: 0 contratações municipais
+2026-04-02 11:07:25,797 INFO UF=GO modalidade=8 página 1/6 — 16 contratos coletados
+2026-04-02 11:07:26,612 INFO UF=GO modalidade=8 página 2/6 — 17 contratos coletados
+2026-04-02 11:07:27,497 INFO UF=GO modalidade=8 página 3/6 — 21 contratos coletados
+2026-04-02 11:07:28,390 INFO UF=GO modalidade=8 página 4/6 — 22 contratos coletados
+2026-04-02 11:07:29,234 INFO UF=GO modalidade=8 página 5/6 — 32 contratos coletados
+2026-04-02 11:07:30,037 INFO UF=GO modalidade=8 página 6/6 — 34 contratos coletados
+2026-04-02 11:07:30,038 INFO Modalidade 8: 34 contratações municipais
+2026-04-02 11:07:50,173 WARNING Timeout https://pncp.gov.br/api/consulta/v1/contratacoes/proposta (tentativa 1)
+2026-04-02 11:07:51,329 INFO Modalidade 9: 0 contratações municipais
+2026-04-02 11:07:51,488 INFO Modalidade 10: 0 contratações municipais
+2026-04-02 11:07:51,652 INFO Modalidade 11: 0 contratações municipais
+2026-04-02 11:07:51,955 INFO UF=GO modalidade=12 página 1/1 — 3 contratos coletados
+2026-04-02 11:07:51,955 INFO Modalidade 12: 3 contratações municipais
+2026-04-02 11:07:52,134 INFO UF=GO modalidade=13 página 1/1 — 0 contratos coletados
+2026-04-02 11:07:52,134 INFO Modalidade 13: 0 contratações municipais
+2026-04-02 11:07:53,446 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/00097857000171/compras/2026/18/itens/1/resultado
+2026-04-02 11:07:54,111 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/00097857000171/compras/2026/22/itens/1/resultado
+2026-04-02 11:07:54,732 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/1/resultado
+2026-04-02 11:07:55,175 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/2/resultado
+2026-04-02 11:07:55,536 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/3/resultado
+2026-04-02 11:07:55,889 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/4/resultado
+2026-04-02 11:07:56,310 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/5/resultado
+2026-04-02 11:07:56,673 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/6/resultado
+2026-04-02 11:07:57,028 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/7/resultado
+2026-04-02 11:07:57,505 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/8/resultado
+2026-04-02 11:07:57,885 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01219807000182/compras/2026/58/itens/9/resultado
+2026-04-02 11:07:58,511 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01505643000150/compras/2026/20/itens/1/resultado
+2026-04-02 11:07:59,076 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01505643000150/compras/2026/21/itens/1/resultado
+2026-04-02 11:07:59,779 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/1/resultado
+2026-04-02 11:08:00,140 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/2/resultado
+2026-04-02 11:08:00,495 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/3/resultado
+2026-04-02 11:08:00,850 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/4/resultado
+2026-04-02 11:08:01,202 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/5/resultado
+2026-04-02 11:08:01,574 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/6/resultado
+2026-04-02 11:08:02,025 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/7/resultado
+2026-04-02 11:08:02,390 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/8/resultado
+2026-04-02 11:08:02,748 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/9/resultado
+2026-04-02 11:08:03,104 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01492098000104/compras/2026/1/itens/10/resultado
+2026-04-02 11:08:03,705 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02215275000178/compras/2026/226/itens/1/resultado
+2026-04-02 11:08:04,252 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/25105255000140/compras/2026/13/itens/1/resultado
+2026-04-02 11:08:04,847 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/99/itens/1/resultado
+2026-04-02 11:08:05,390 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/100/itens/1/resultado
+2026-04-02 11:08:05,755 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/100/itens/2/resultado
+2026-04-02 11:08:06,307 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/101/itens/1/resultado
+2026-04-02 11:08:06,664 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/101/itens/2/resultado
+2026-04-02 11:08:07,104 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/101/itens/3/resultado
+2026-04-02 11:08:07,655 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/102/itens/1/resultado
+2026-04-02 11:08:08,216 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/1/resultado
+2026-04-02 11:08:08,580 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/2/resultado
+2026-04-02 11:08:09,343 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/3/resultado
+2026-04-02 11:08:09,700 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/4/resultado
+2026-04-02 11:08:10,050 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/5/resultado
+2026-04-02 11:08:11,446 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/6/resultado
+2026-04-02 11:08:11,880 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/7/resultado
+2026-04-02 11:08:12,238 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/8/resultado
+2026-04-02 11:08:12,598 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/9/resultado
+2026-04-02 11:08:12,960 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/103/itens/10/resultado
+2026-04-02 11:08:13,524 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/109/itens/1/resultado
+2026-04-02 11:08:14,060 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/111/itens/1/resultado
+2026-04-02 11:08:14,413 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/111/itens/2/resultado
+2026-04-02 11:08:14,945 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/113/itens/1/resultado
+2026-04-02 11:08:15,602 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/1/resultado
+2026-04-02 11:08:15,956 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/2/resultado
+2026-04-02 11:08:16,316 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/3/resultado
+2026-04-02 11:08:16,690 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/4/resultado
+2026-04-02 11:08:17,046 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/5/resultado
+2026-04-02 11:08:17,486 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/6/resultado
+2026-04-02 11:08:17,838 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/7/resultado
+2026-04-02 11:08:18,195 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/8/resultado
+2026-04-02 11:08:18,558 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/9/resultado
+2026-04-02 11:08:18,911 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01181585000156/compras/2026/40/itens/10/resultado
+2026-04-02 11:08:19,488 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02218683000183/compras/2026/117/itens/1/resultado
+2026-04-02 11:08:20,061 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/36863108000155/compras/2026/9/itens/1/resultado
+2026-04-02 11:08:20,615 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/36863108000155/compras/2026/10/itens/1/resultado
+2026-04-02 11:08:21,158 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/06129491000151/compras/2026/36/itens/1/resultado
+2026-04-02 11:08:21,520 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/06129491000151/compras/2026/36/itens/2/resultado
+2026-04-02 11:08:21,881 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/06129491000151/compras/2026/36/itens/3/resultado
+2026-04-02 11:08:22,274 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/06129491000151/compras/2026/36/itens/4/resultado
+2026-04-02 11:08:22,644 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/06129491000151/compras/2026/36/itens/5/resultado
+2026-04-02 11:08:23,307 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/1/resultado
+2026-04-02 11:08:23,672 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/2/resultado
+2026-04-02 11:08:24,034 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/3/resultado
+2026-04-02 11:08:24,388 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/4/resultado
+2026-04-02 11:08:24,740 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/5/resultado
+2026-04-02 11:08:25,101 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/6/resultado
+2026-04-02 11:08:25,461 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/7/resultado
+2026-04-02 11:08:25,821 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/8/resultado
+2026-04-02 11:08:26,174 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/9/resultado
+2026-04-02 11:08:26,535 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01303221000100/compras/2026/90/itens/10/resultado
+2026-04-02 11:08:27,168 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/04374097000153/compras/2026/3/itens/1/resultado
+2026-04-02 11:08:27,603 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/04374097000153/compras/2026/3/itens/2/resultado
+2026-04-02 11:08:27,964 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/04374097000153/compras/2026/3/itens/3/resultado
+2026-04-02 11:08:28,628 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01304286000161/compras/2026/44/itens/1/resultado
+2026-04-02 11:08:29,247 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/86877099000120/compras/2026/12/itens/1/resultado
+2026-04-02 11:08:29,830 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/1/resultado
+2026-04-02 11:08:30,186 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/2/resultado
+2026-04-02 11:08:30,543 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/3/resultado
+2026-04-02 11:08:30,902 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/4/resultado
+2026-04-02 11:08:31,255 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/5/resultado
+2026-04-02 11:08:31,618 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/6/resultado
+2026-04-02 11:08:31,985 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/7/resultado
+2026-04-02 11:08:32,412 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/8/resultado
+2026-04-02 11:08:32,788 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/02056737000151/compras/2026/87/itens/9/resultado
+2026-04-02 11:08:33,345 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01170331000132/compras/2026/21/itens/1/resultado
+2026-04-02 11:08:33,896 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/217/itens/1/resultado
+2026-04-02 11:08:34,516 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/1/resultado
+2026-04-02 11:08:34,886 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/2/resultado
+2026-04-02 11:08:35,238 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/3/resultado
+2026-04-02 11:08:35,594 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/4/resultado
+2026-04-02 11:08:35,975 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/5/resultado
+2026-04-02 11:08:36,422 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/6/resultado
+2026-04-02 11:08:36,785 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/220/itens/7/resultado
+2026-04-02 11:08:37,422 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/221/itens/1/resultado
+2026-04-02 11:08:37,967 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/223/itens/1/resultado
+2026-04-02 11:08:38,527 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/13608402000115/compras/2026/9/itens/1/resultado
+2026-04-02 11:08:39,070 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/225/itens/1/resultado
+2026-04-02 11:08:39,652 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/1/resultado
+2026-04-02 11:08:40,007 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/2/resultado
+2026-04-02 11:08:40,363 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/3/resultado
+2026-04-02 11:08:40,714 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/4/resultado
+2026-04-02 11:08:41,136 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/5/resultado
+2026-04-02 11:08:41,494 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/6/resultado
+2026-04-02 11:08:41,854 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/7/resultado
+2026-04-02 11:08:42,222 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/8/resultado
+2026-04-02 11:08:42,661 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/9/resultado
+2026-04-02 11:08:43,023 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01740430000102/compras/2026/44/itens/10/resultado
+2026-04-02 11:08:43,582 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/1/resultado
+2026-04-02 11:08:43,941 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/2/resultado
+2026-04-02 11:08:44,296 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/3/resultado
+2026-04-02 11:08:45,668 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/4/resultado
+2026-04-02 11:08:46,116 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/5/resultado
+2026-04-02 11:08:46,475 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/6/resultado
+2026-04-02 11:08:46,836 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/11038582000111/compras/2026/24/itens/7/resultado
+2026-04-02 11:08:47,427 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/1/resultado
+2026-04-02 11:08:47,864 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/2/resultado
+2026-04-02 11:08:48,223 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/3/resultado
+2026-04-02 11:08:48,579 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/4/resultado
+2026-04-02 11:08:49,005 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/5/resultado
+2026-04-02 11:08:49,445 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/6/resultado
+2026-04-02 11:08:49,810 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/7/resultado
+2026-04-02 11:08:50,229 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/8/resultado
+2026-04-02 11:08:50,660 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/9/resultado
+2026-04-02 11:08:51,012 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/226/itens/10/resultado
+2026-04-02 11:08:51,579 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/1/resultado
+2026-04-02 11:08:51,931 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/2/resultado
+2026-04-02 11:08:52,293 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/3/resultado
+2026-04-02 11:08:52,652 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/4/resultado
+2026-04-02 11:08:53,010 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/5/resultado
+2026-04-02 11:08:53,366 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/6/resultado
+2026-04-02 11:08:53,728 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/7/resultado
+2026-04-02 11:08:54,082 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/8/resultado
+2026-04-02 11:08:54,440 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/9/resultado
+2026-04-02 11:08:54,847 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01801612000146/compras/2026/329/itens/10/resultado
+2026-04-02 11:08:55,388 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/12053489000149/compras/2026/65/itens/1/resultado
+2026-04-02 11:08:56,020 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/227/itens/1/resultado
+2026-04-02 11:08:56,563 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/231/itens/1/resultado
+2026-04-02 11:08:57,003 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/24859332000194/compras/2026/231/itens/2/resultado
+2026-04-02 11:08:57,549 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01738780000134/compras/2026/31/itens/1/resultado
+2026-04-02 11:08:58,080 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01738780000134/compras/2026/33/itens/1/resultado
+2026-04-02 11:08:58,621 WARNING HTTP ? para https://pncp.gov.br/api/pncp/v1/orgaos/01738780000134/compras/2026/34/itens/1/resultado
+2026-04-02 11:08:59,054 INFO View mv_media_preco_municipal criada/verificada.
+2026-04-02 11:08:59,054 INFO Coleta finalizada UF=GO | contratos=43 novos=43 | itens=145 novos=145 | erros=0 | 140.1s
+
+============================================================
+UF: GO
+Contratações coletadas: 43 (43 novas)
+Itens coletados: 145 (145 novos)
+Erros: 0
+Duração: 140.1s

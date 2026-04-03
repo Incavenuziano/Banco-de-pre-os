@@ -176,6 +176,37 @@ def exportar_csv(
 
 
 @router.get(
+    "/comparativo-item",
+    summary="Comparativo de preço de um item por UF",
+    response_description="Histórico local + benchmark por UF",
+)
+def comparativo_item(
+    descricao: Annotated[str, Query(description="Descrição do item")],
+    uf: Annotated[str | None, Query(description="Filtrar histórico por UF")] = None,
+) -> dict:
+    """Compara preços de um item: histórico local e benchmark por UF."""
+    return _service.get_comparativo_item(descricao=descricao, uf=uf)
+
+
+@router.get(
+    "/historico",
+    summary="Histórico de preços de um item",
+    response_description="Lista cronológica de preços para uma descrição",
+)
+def historico_item(
+    descricao: Annotated[str, Query(description="Descrição do item para buscar histórico")],
+    uf: Annotated[str | None, Query(description="Filtrar por UF")] = None,
+    limite: Annotated[int, Query(description="Limite de registros", ge=1, le=500)] = 100,
+) -> dict:
+    """Retorna histórico cronológico de preços para um item.
+
+    Busca todas as ocorrências de itens com descrição similar (ILIKE),
+    retornando dados de múltiplas contratações ordenados por data.
+    """
+    return _service.get_historico_item(descricao=descricao, uf=uf, limite=limite)
+
+
+@router.get(
     "/categorias",
     summary="Lista categorias disponíveis",
     response_description="Lista de categorias com metadados",
