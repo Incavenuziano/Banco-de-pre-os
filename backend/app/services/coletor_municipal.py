@@ -18,6 +18,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import re
 import logging
 import time
 from dataclasses import dataclass, field
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 CONSULT_URL = "https://pncp.gov.br/api/consulta/v1/contratacoes/publicacao"
 ITEMS_URL_TPL = "https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens"
-RESULTADO_URL_TPL = "https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens/{item}/resultado"
+RESULTADO_URL_TPL = "https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens/{item}/resultados"
 
 # PNCP bloqueia curl/scripts sem User-Agent de browser
 HEADERS = {
@@ -130,6 +131,7 @@ class ItemRaw:
     valor_total: float | None
     catmat: str | None
     tipo_preco: str = "estimado"
+    tipo_objeto: str = "material"
 
 
 @dataclass
@@ -270,15 +272,17 @@ def buscar_itens(cnpj: str, ano: int, seq: int) -> list[ItemRaw]:
         except Exception:
             pass
 
+        descricao_item = (it.get("descricao") or "")[:2000]
         itens.append(ItemRaw(
             numero_item=numero_item,
-            descricao=(it.get("descricao") or "")[:2000],
+            descricao=descricao_item,
             quantidade=_float_safe(it.get("quantidade")),
             unidade=it.get("unidadeMedida", {}).get("nomeUnidadeMedida") if isinstance(it.get("unidadeMedida"), dict) else it.get("unidadeMedida"),
             valor_unitario=valor_unitario,
             valor_total=_float_safe(it.get("valorTotal")),
             catmat=it.get("catalogoAquisicao", {}).get("codigo") if isinstance(it.get("catalogoAquisicao"), dict) else None,
             tipo_preco=tipo_preco,
+            tipo_objeto=_infer_tipo_objeto(descricao_item),
         ))
         time.sleep(SLEEP_ENTRE_ITENS)
 
@@ -347,8 +351,8 @@ def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
         cur.execute("""
             INSERT INTO itens
                 (contratacao_id, numero_item, descricao, quantidade,
-                 unidade, valor_unitario, valor_total, catmat_catser, tipo_preco)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 unidade, valor_unitario, valor_total, catmat_catser, tipo_preco, tipo_objeto)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING
             RETURNING id
         """, (
@@ -361,6 +365,7 @@ def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
             it.valor_total,
             it.catmat,
             it.tipo_preco,
+            it.tipo_objeto,
         ))
         if cur.rowcount > 0:
             novos += 1
@@ -561,6 +566,21 @@ def _float_safe(v: Any) -> float | None:
         return float(v)
     except (TypeError, ValueError):
         return None
+
+
+def _infer_tipo_objeto(descricao: str | None) -> str:
+    """Heuristica simples para separar material, servico e obra na ingestao."""
+    texto = (descricao or "").strip().lower()
+    if not texto:
+        return "material"
+
+    if re.search(r"(obra|engenharia|reforma|pavimenta[c?][a?]o|constru[c?][a?]o|edifica[c?][a?]o|drenagem|terraplanagem)", texto):
+        return "obra"
+
+    if re.search(r"(servi[c?]o|manuten[c?][a?]o|loca[c?][a?]o|consultoria|suporte|limpeza|transporte|vigil[?a]ncia|portaria|dedetiza[c?][a?]o|reprografia|telefonia|internet)", texto):
+        return "servico"
+
+    return "material"
 
 
 # ─────────────────────────────────────────────────────────

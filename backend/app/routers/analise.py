@@ -31,19 +31,20 @@ _benchmark = BenchmarkRegionalService()
 def listar_precos(
     uf: Annotated[str | None, Query(description="Filtrar por UF (ex: SP, RJ)")] = None,
     categoria: Annotated[str | None, Query(description="Filtrar por categoria")] = None,
-    municipio: Annotated[str | None, Query(description="Filtrar por município (ex: Goiânia)")] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto: material, servico ou obra", pattern=r"^(material|servico|obra)$")] = None,
+    municipio: Annotated[str | None, Query(description="Filtrar por munic?pio (ex: Goi?nia)")] = None,
     data_inicio: Annotated[
         str | None, Query(description="Data inicial (YYYY-MM-DD)", pattern=r"^\d{4}-\d{2}-\d{2}$")
     ] = None,
     data_fim: Annotated[
         str | None, Query(description="Data final (YYYY-MM-DD)", pattern=r"^\d{4}-\d{2}-\d{2}$")
     ] = None,
-    preco_min: Annotated[float | None, Query(description="Preço mínimo", ge=0)] = None,
-    preco_max: Annotated[float | None, Query(description="Preço máximo", ge=0)] = None,
-    pagina: Annotated[int, Query(description="Página (começa em 1)", ge=1)] = 1,
-    por_pagina: Annotated[int, Query(description="Itens por página", ge=1, le=100)] = 20,
-    ordenar_por: Annotated[str, Query(description="Campo de ordenação: 'data' ou 'preco'", pattern=r"^(data|preco)$")] = "data",
-    ordem: Annotated[str, Query(description="Direção: 'asc' ou 'desc'", pattern=r"^(asc|desc)$")] = "desc",
+    preco_min: Annotated[float | None, Query(description="Pre?o m?nimo", ge=0)] = None,
+    preco_max: Annotated[float | None, Query(description="Pre?o m?ximo", ge=0)] = None,
+    pagina: Annotated[int, Query(description="P?gina (come?a em 1)", ge=1)] = 1,
+    por_pagina: Annotated[int, Query(description="Itens por p?gina", ge=1, le=100)] = 20,
+    ordenar_por: Annotated[str, Query(description="Campo de ordena??o: 'data' ou 'preco'", pattern=r"^(data|preco)$")] = "data",
+    ordem: Annotated[str, Query(description="Dire??o: 'asc' ou 'desc'", pattern=r"^(asc|desc)$")] = "desc",
 ) -> dict:
     """Lista preços com filtros avançados: UF, categoria, município, data e faixa de preço.
 
@@ -54,6 +55,7 @@ def listar_precos(
     return _service.listar_precos(
         uf=uf,
         categoria=categoria,
+        tipo_objeto=tipo_objeto,
         municipio=municipio,
         data_inicio=data_inicio,
         data_fim=data_fim,
@@ -72,19 +74,20 @@ def listar_precos(
     response_description="Série temporal de preços por UF",
 )
 def obter_tendencias(
-    categoria: Annotated[str, Query(description="Categoria para análise de tendência")],
+    categoria: Annotated[str, Query(description="Categoria para an?lise de tend?ncia")],
     ufs: Annotated[
         list[str] | None,
         Query(description="UFs para comparar (ex: SP, RJ, MG)"),
     ] = None,
-    meses: Annotated[int, Query(description="Meses de histórico (1-24)", ge=1, le=24)] = 6,
+    meses: Annotated[int, Query(description="Meses de hist?rico (1-24)", ge=1, le=24)] = 6,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
 ) -> dict:
     """Retorna tendências de preço ao longo do tempo por categoria e UF.
 
     Inclui série temporal mensal, variação percentual e indicador de tendência
     (ALTA, QUEDA, ESTAVEL) para cada UF selecionada.
     """
-    return _service.obter_tendencias(categoria=categoria, ufs=ufs, meses=meses)
+    return _service.obter_tendencias(categoria=categoria, ufs=ufs, meses=meses, tipo_objeto=tipo_objeto)
 
 
 @router.get(
@@ -98,13 +101,14 @@ def obter_comparativo(
         list[str] | None,
         Query(description="UFs para comparar. Se omitido, usa todas as 15 validadas"),
     ] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
 ) -> dict:
     """Compara preços de uma categoria entre múltiplas UFs.
 
     Retorna ranking por preço, diferença percentual em relação à média e
     estatísticas descritivas do comparativo.
     """
-    return _service.obter_comparativo_ufs(categoria=categoria, ufs=ufs)
+    return _service.obter_comparativo_ufs(categoria=categoria, ufs=ufs, tipo_objeto=tipo_objeto)
 
 
 @router.get(
@@ -118,13 +122,14 @@ def dashboard_analise(
         Query(description="UFs para incluir no dashboard"),
     ] = None,
     categoria: Annotated[str | None, Query(description="Filtrar por categoria")] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
 ) -> dict:
     """Retorna KPIs e métricas agregadas para o dashboard principal.
 
     Inclui totais, distribuição por UF, top categorias e cobertura.
     Otimizado para latência < 1s.
     """
-    return _service.obter_resumo_dashboard(ufs=ufs, categoria=categoria)
+    return _service.obter_resumo_dashboard(ufs=ufs, categoria=categoria, tipo_objeto=tipo_objeto)
 
 
 @router.get(
@@ -135,15 +140,16 @@ def dashboard_analise(
 def exportar_csv(
     uf: Annotated[str | None, Query(description="Filtrar por UF")] = None,
     categoria: Annotated[str | None, Query(description="Filtrar por categoria")] = None,
-    municipio: Annotated[str | None, Query(description="Filtrar por município")] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
+    municipio: Annotated[str | None, Query(description="Filtrar por munic?pio")] = None,
     data_inicio: Annotated[
         str | None, Query(description="Data inicial (YYYY-MM-DD)", pattern=r"^\d{4}-\d{2}-\d{2}$")
     ] = None,
     data_fim: Annotated[
         str | None, Query(description="Data final (YYYY-MM-DD)", pattern=r"^\d{4}-\d{2}-\d{2}$")
     ] = None,
-    preco_min: Annotated[float | None, Query(description="Preço mínimo", ge=0)] = None,
-    preco_max: Annotated[float | None, Query(description="Preço máximo", ge=0)] = None,
+    preco_min: Annotated[float | None, Query(description="Pre?o m?nimo", ge=0)] = None,
+    preco_max: Annotated[float | None, Query(description="Pre?o m?ximo", ge=0)] = None,
 ) -> StreamingResponse:
     """Exporta preços filtrados em formato CSV (UTF-8-BOM, compatível com Excel).
 
@@ -152,6 +158,7 @@ def exportar_csv(
     csv_bytes = _service.exportar_csv(
         uf=uf,
         categoria=categoria,
+        tipo_objeto=tipo_objeto,
         municipio=municipio,
         data_inicio=data_inicio,
         data_fim=data_fim,
@@ -181,11 +188,12 @@ def exportar_csv(
     response_description="Histórico local + benchmark por UF",
 )
 def comparativo_item(
-    descricao: Annotated[str, Query(description="Descrição do item")],
-    uf: Annotated[str | None, Query(description="Filtrar histórico por UF")] = None,
+    descricao: Annotated[str, Query(description="Descri??o do item")],
+    uf: Annotated[str | None, Query(description="Filtrar hist?rico por UF")] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
 ) -> dict:
     """Compara preços de um item: histórico local e benchmark por UF."""
-    return _service.get_comparativo_item(descricao=descricao, uf=uf)
+    return _service.get_comparativo_item(descricao=descricao, uf=uf, tipo_objeto=tipo_objeto)
 
 
 @router.get(
@@ -196,6 +204,7 @@ def comparativo_item(
 def historico_item(
     descricao: Annotated[str, Query(description="Descrição do item para buscar histórico")],
     uf: Annotated[str | None, Query(description="Filtrar por UF")] = None,
+    tipo_objeto: Annotated[str | None, Query(description="Filtrar por tipo de objeto", pattern=r"^(material|servico|obra)$")] = None,
     limite: Annotated[int, Query(description="Limite de registros", ge=1, le=500)] = 100,
 ) -> dict:
     """Retorna histórico cronológico de preços para um item.
@@ -203,7 +212,7 @@ def historico_item(
     Busca todas as ocorrências de itens com descrição similar (ILIKE),
     retornando dados de múltiplas contratações ordenados por data.
     """
-    return _service.get_historico_item(descricao=descricao, uf=uf, limite=limite)
+    return _service.get_historico_item(descricao=descricao, uf=uf, tipo_objeto=tipo_objeto, limite=limite)
 
 
 @router.get(

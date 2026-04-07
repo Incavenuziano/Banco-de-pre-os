@@ -1,0 +1,21 @@
+2026-04-06 19:56:48,907 INFO Contratações a processar: 27273 (uf=GO, limit=0, dry_run=False)
+2026-04-06 19:58:13,765 INFO [100/27273] atualiz=59 sem_resultado=393 erros=0
+2026-04-06 19:59:31,457 INFO [200/27273] atualiz=113 sem_resultado=786 erros=0
+2026-04-06 20:00:56,723 INFO [300/27273] atualiz=172 sem_resultado=1140 erros=1
+2026-04-06 20:02:19,730 INFO [400/27273] atualiz=233 sem_resultado=1517 erros=1
+2026-04-06 20:03:24,165 INFO [500/27273] atualiz=247 sem_resultado=1935 erros=1
+2026-04-06 20:04:31,872 INFO [600/27273] atualiz=270 sem_resultado=2343 erros=1
+2026-04-06 20:05:47,052 INFO [700/27273] atualiz=312 sem_resultado=2769 erros=1
+2026-04-06 20:07:14,440 INFO [800/27273] atualiz=395 sem_resultado=3143 erros=2
+2026-04-06 20:08:28,333 INFO [900/27273] atualiz=440 sem_resultado=3486 erros=3
+2026-04-06 20:09:39,312 INFO [1000/27273] atualiz=479 sem_resultado=3836 erros=3
+2026-04-06 20:10:47,697 INFO [1100/27273] atualiz=503 sem_resultado=4199 erros=4
+2026-04-06 20:12:41,229 INFO [1200/27273] atualiz=589 sem_resultado=4564 erros=4
+2026-04-06 20:13:54,383 INFO [1300/27273] atualiz=629 sem_resultado=4882 erros=4
+2026-04-06 20:15:11,689 INFO [1400/27273] atualiz=684 sem_resultado=5252 erros=4
+2026-04-06 20:16:37,435 INFO [1500/27273] atualiz=754 sem_resultado=5596 erros=4
+2026-04-06 20:17:55,651 INFO [1600/27273] atualiz=808 sem_resultado=5962 erros=5
+2026-04-06 20:19:18,748 INFO [1700/27273] atualiz=873 sem_resultado=6347 erros=5
+2026-04-06 20:20:30,190 INFO [1800/27273] atualiz=905 sem_resultado=6721 erros=5
+2026-04-06 20:22:07,433 INFO [1900/27273] atualiz=1000 sem_resultado=7126 erros=6
+2026-04-06 20:23:42,755 INFO [2000/27273] atualiz=1055 sem_resultado=7526 erros=6

@@ -72,6 +72,16 @@ cd backend && python3 -m pytest --tb=short -q
 cd frontend && npm test -- --run
 ```
 
+## Filtros Operacionais
+
+- `tipo_objeto`: os endpoints principais de analise agora aceitam `material`, `servico` ou `obra`.
+- Regra de preco operacional documentada em `docs/REGRAS_PRECO.md`.
+
+## Setup WSL
+
+- Rode backend, frontend e banco dentro do WSL para evitar problemas de caminho UNC ao usar `npm` e `vitest`.
+- Se estiver no Windows, prefira abrir um shell do Ubuntu e executar os comandos do projeto a partir de `/home/danilo/.openclaw/...`.
+
 ## API Principal
 
 | Rota | Descrição |

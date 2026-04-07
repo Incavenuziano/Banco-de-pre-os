@@ -24,6 +24,7 @@ class Item(Base):
     contratacao_id: Mapped[int] = mapped_column(ForeignKey("contratacoes.id"), nullable=False)
     unidade_original: Mapped[str | None] = mapped_column(String(50))
     unidade_normalizada: Mapped[str | None] = mapped_column(String(20))
+    tipo_objeto: Mapped[str | None] = mapped_column(String(20), default="material")
     criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     contratacao: Mapped["Contratacao"] = relationship(back_populates="itens")  # noqa: F821

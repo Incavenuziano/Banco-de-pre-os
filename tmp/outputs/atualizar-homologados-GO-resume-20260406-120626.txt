@@ -1,0 +1,112 @@
+2026-04-06 12:06:30,348 INFO Contratações a processar: 28342 (uf=GO, limit=0, dry_run=False)
+2026-04-06 12:07:54,907 INFO [100/28342] atualiz=59 sem_resultado=393 erros=0
+2026-04-06 12:09:15,714 INFO [200/28342] atualiz=113 sem_resultado=786 erros=0
+2026-04-06 12:10:37,596 INFO [300/28342] atualiz=172 sem_resultado=1140 erros=1
+2026-04-06 12:11:59,014 INFO [400/28342] atualiz=233 sem_resultado=1517 erros=1
+2026-04-06 12:13:04,521 INFO [500/28342] atualiz=247 sem_resultado=1935 erros=1
+2026-04-06 12:14:12,470 INFO [600/28342] atualiz=270 sem_resultado=2343 erros=1
+2026-04-06 12:15:27,817 INFO [700/28342] atualiz=312 sem_resultado=2769 erros=1
+2026-04-06 12:16:56,200 INFO [800/28342] atualiz=395 sem_resultado=3143 erros=2
+2026-04-06 12:18:11,465 INFO [900/28342] atualiz=440 sem_resultado=3486 erros=3
+2026-04-06 12:19:23,712 INFO [1000/28342] atualiz=479 sem_resultado=3836 erros=3
+2026-04-06 12:20:31,299 INFO [1100/28342] atualiz=503 sem_resultado=4197 erros=4
+2026-04-06 12:22:02,399 INFO [1200/28342] atualiz=589 sem_resultado=4564 erros=4
+2026-04-06 12:23:14,044 INFO [1300/28342] atualiz=629 sem_resultado=4875 erros=4
+2026-04-06 12:24:35,723 INFO [1400/28342] atualiz=684 sem_resultado=5252 erros=4
+2026-04-06 12:26:02,091 INFO [1500/28342] atualiz=754 sem_resultado=5595 erros=4
+2026-04-06 12:27:20,512 INFO [1600/28342] atualiz=808 sem_resultado=5962 erros=5
+2026-04-06 12:27:51,386 ERROR Erro https://pncp.gov.br/api/pncp/v1/orgaos/02394757000132/compras/2025/112/itens: HTTPSConnectionPool(host='pncp.gov.br', port=443): Max retries exceeded with url: /api/pncp/v1/orgaos/02394757000132/compras/2025/112/itens (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7d25701e55b0>: Failed to resolve 'pncp.gov.br' ([Errno -3] Temporary failure in name resolution)"))
+2026-04-06 12:29:00,998 INFO [1700/28342] atualiz=866 sem_resultado=6343 erros=6
+2026-04-06 12:30:11,218 INFO [1800/28342] atualiz=898 sem_resultado=6716 erros=6
+2026-04-06 12:31:48,073 INFO [1900/28342] atualiz=993 sem_resultado=7121 erros=7
+2026-04-06 12:33:07,651 INFO [2000/28342] atualiz=1048 sem_resultado=7521 erros=7
+2026-04-06 12:34:27,284 INFO [2100/28342] atualiz=1105 sem_resultado=7889 erros=7
+2026-04-06 12:35:51,318 INFO [2200/28342] atualiz=1167 sem_resultado=8314 erros=7
+2026-04-06 12:37:08,673 INFO [2300/28342] atualiz=1217 sem_resultado=8714 erros=7
+2026-04-06 12:38:35,520 INFO [2400/28342] atualiz=1290 sem_resultado=9042 erros=8
+2026-04-06 12:39:50,361 INFO [2500/28342] atualiz=1332 sem_resultado=9387 erros=8
+2026-04-06 12:41:14,715 INFO [2600/28342] atualiz=1401 sem_resultado=9734 erros=8
+2026-04-06 12:42:27,453 INFO [2700/28342] atualiz=1434 sem_resultado=10097 erros=8
+2026-04-06 12:43:43,111 INFO [2800/28342] atualiz=1481 sem_resultado=10446 erros=9
+2026-04-06 12:44:51,330 INFO [2900/28342] atualiz=1514 sem_resultado=10734 erros=10
+2026-04-06 12:46:17,524 INFO [3000/28342] atualiz=1587 sem_resultado=11072 erros=10
+2026-04-06 12:47:33,987 INFO [3100/28342] atualiz=1635 sem_resultado=11407 erros=10
+2026-04-06 12:48:51,655 INFO [3200/28342] atualiz=1683 sem_resultado=11789 erros=11
+2026-04-06 12:50:11,206 INFO [3300/28342] atualiz=1739 sem_resultado=12194 erros=11
+2026-04-06 12:51:27,912 INFO [3400/28342] atualiz=1787 sem_resultado=12545 erros=11
+2026-04-06 12:52:40,323 INFO [3500/28342] atualiz=1821 sem_resultado=12916 erros=12
+2026-04-06 12:54:01,998 INFO [3600/28342] atualiz=1886 sem_resultado=13250 erros=12
+2026-04-06 12:55:15,895 INFO [3700/28342] atualiz=1927 sem_resultado=13654 erros=12
+2026-04-06 12:56:25,651 INFO [3800/28342] atualiz=1961 sem_resultado=14011 erros=12
+2026-04-06 12:57:44,728 INFO [3900/28342] atualiz=2008 sem_resultado=14361 erros=12
+2026-04-06 12:59:03,624 INFO [4000/28342] atualiz=2061 sem_resultado=14701 erros=13
+2026-04-06 13:00:20,098 INFO [4100/28342] atualiz=2114 sem_resultado=15019 erros=13
+2026-04-06 13:01:40,018 INFO [4200/28342] atualiz=2172 sem_resultado=15376 erros=13
+2026-04-06 13:03:07,750 INFO [4300/28342] atualiz=2252 sem_resultado=15729 erros=14
+2026-04-06 13:04:19,033 INFO [4400/28342] atualiz=2290 sem_resultado=16089 erros=14
+2026-04-06 13:05:22,772 INFO [4500/28342] atualiz=2303 sem_resultado=16448 erros=14
+2026-04-06 13:08:08,181 INFO [4700/28342] atualiz=2434 sem_resultado=17173 erros=17
+2026-04-06 13:09:19,870 INFO [4800/28342] atualiz=2471 sem_resultado=17478 erros=17
+2026-04-06 13:10:45,527 INFO [4900/28342] atualiz=2524 sem_resultado=17837 erros=18
+2026-04-06 13:12:02,448 INFO [5000/28342] atualiz=2574 sem_resultado=18150 erros=20
+2026-04-06 13:13:16,199 INFO [5100/28342] atualiz=2613 sem_resultado=18464 erros=20
+2026-04-06 13:14:35,821 INFO [5200/28342] atualiz=2667 sem_resultado=18856 erros=20
+2026-04-06 13:16:05,098 INFO [5300/28342] atualiz=2733 sem_resultado=19259 erros=20
+2026-04-06 13:17:31,175 INFO [5400/28342] atualiz=2797 sem_resultado=19612 erros=21
+2026-04-06 13:18:48,580 INFO [5500/28342] atualiz=2851 sem_resultado=19950 erros=21
+2026-04-06 13:20:26,181 INFO [5600/28342] atualiz=2909 sem_resultado=20251 erros=22
+2026-04-06 13:22:02,791 INFO [5700/28342] atualiz=2957 sem_resultado=20614 erros=23
+2026-04-06 13:23:39,877 INFO [5800/28342] atualiz=3005 sem_resultado=20960 erros=23
+2026-04-06 13:25:14,288 INFO [5900/28342] atualiz=3073 sem_resultado=21304 erros=23
+2026-04-06 13:26:47,685 INFO [6000/28342] atualiz=3153 sem_resultado=21661 erros=23
+2026-04-06 13:28:06,997 INFO [6100/28342] atualiz=3207 sem_resultado=22006 erros=23
+2026-04-06 13:29:22,402 INFO [6200/28342] atualiz=3256 sem_resultado=22364 erros=23
+2026-04-06 13:30:56,925 INFO [6300/28342] atualiz=3317 sem_resultado=22701 erros=23
+2026-04-06 13:32:14,006 INFO [6400/28342] atualiz=3348 sem_resultado=23091 erros=23
+2026-04-06 13:33:33,345 INFO [6500/28342] atualiz=3404 sem_resultado=23480 erros=23
+2026-04-06 13:34:44,289 INFO [6600/28342] atualiz=3438 sem_resultado=23850 erros=23
+2026-04-06 13:36:04,602 INFO [6700/28342] atualiz=3497 sem_resultado=24203 erros=23
+2026-04-06 13:37:27,345 INFO [6800/28342] atualiz=3559 sem_resultado=24554 erros=25
+2026-04-06 13:38:47,574 INFO [6900/28342] atualiz=3609 sem_resultado=24901 erros=26
+2026-04-06 13:39:58,586 INFO [7000/28342] atualiz=3644 sem_resultado=25245 erros=26
+2026-04-06 13:41:12,381 INFO [7100/28342] atualiz=3686 sem_resultado=25568 erros=26
+2026-04-06 13:42:31,370 INFO [7200/28342] atualiz=3744 sem_resultado=25922 erros=27
+2026-04-06 13:43:48,668 INFO [7300/28342] atualiz=3792 sem_resultado=26280 erros=29
+2026-04-06 13:44:59,460 INFO [7400/28342] atualiz=3820 sem_resultado=26635 erros=29
+2026-04-06 13:47:00,956 INFO [7500/28342] atualiz=3999 sem_resultado=26826 erros=29
+2026-04-06 13:51:35,066 INFO [7600/28342] atualiz=4239 sem_resultado=26965 erros=29
+2026-04-06 13:54:13,475 INFO [7700/28342] atualiz=4507 sem_resultado=27086 erros=29
+2026-04-06 13:56:58,259 INFO [7800/28342] atualiz=4751 sem_resultado=27174 erros=29
+2026-04-06 14:01:33,590 INFO [7900/28342] atualiz=4971 sem_resultado=27265 erros=29
+2026-04-06 14:05:16,088 INFO [8000/28342] atualiz=5270 sem_resultado=27330 erros=29
+2026-04-06 14:07:49,943 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-06 14:07:57,471 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-06 14:10:08,048 INFO [8100/28342] atualiz=5488 sem_resultado=27436 erros=29
+2026-04-06 14:15:48,928 INFO [8200/28342] atualiz=5729 sem_resultado=27536 erros=29
+2026-04-06 14:19:04,652 INFO [8300/28342] atualiz=5978 sem_resultado=27642 erros=29
+2026-04-06 14:22:29,493 WARNING HTTP ?: https://pncp.gov.br/api/pncp/v1/orgaos/01409580000138/compras/2025/1410/itens/3/resultados
+2026-04-06 14:22:36,698 INFO [8400/28342] atualiz=6198 sem_resultado=27801 erros=29
+2026-04-06 14:27:02,026 INFO [8500/28342] atualiz=6467 sem_resultado=27896 erros=29
+2026-04-06 14:30:42,507 INFO [8600/28342] atualiz=6669 sem_resultado=28016 erros=29
+2026-04-06 14:32:47,748 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-06 14:33:05,891 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-06 14:33:10,967 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is not yet accepting connections
+DETAIL:  Consistent recovery state has not been yet reached.
+
+2026-04-06 14:38:06,491 INFO [8700/28342] atualiz=6895 sem_resultado=28105 erros=29
+2026-04-06 14:38:23,678 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-06 14:38:23,749 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-06 14:42:07,520 INFO [8800/28342] atualiz=7128 sem_resultado=28234 erros=29
+2026-04-06 14:46:01,629 INFO [8900/28342] atualiz=7398 sem_resultado=28316 erros=29

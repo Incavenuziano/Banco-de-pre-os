@@ -80,6 +80,17 @@ CATEGORIAS = [
     "Uniforme Funcional",
 ]
 
+TIPOS_OBJETO_VALIDOS = ("material", "servico", "obra")
+
+
+def _normalize_tipo_objeto(tipo_objeto: str | None) -> str | None:
+    """Normaliza filtro de tipo de objeto para uso consistente em SQL."""
+    if tipo_objeto is None:
+        return None
+
+    normalized = tipo_objeto.strip().lower()
+    return normalized if normalized in TIPOS_OBJETO_VALIDOS else None
+
 
 def _variacao_mensal(base: float, mes: int, ano: int, seed: int) -> float:
     """Gera variação de preço determinística (mantida para compatibilidade de testes)."""
@@ -102,6 +113,7 @@ class AnaliseService:
         self,
         uf: str | None = None,
         categoria: str | None = None,
+        tipo_objeto: str | None = None,
         municipio: str | None = None,
         data_inicio: str | None = None,
         data_fim: str | None = None,
@@ -125,6 +137,7 @@ class AnaliseService:
         # Nota: aliases do UNION — data_referencia = ct.data_publicacao, preco_unitario
         campo_ord = "data_referencia" if ordenar_por == "data" else "preco_unitario"
         dir_ord = "ASC" if ordem == "asc" else "DESC"
+        tipo_objeto_norm = _normalize_tipo_objeto(tipo_objeto)
 
         db = _get_session()
         try:
@@ -149,7 +162,8 @@ class AnaliseService:
                     o.razao_social           AS orgao,
                     fp.score_confianca       AS score_confianca,
                     ct.numero_controle_pncp  AS numero_controle_pncp,
-                    COALESCE(fp.tipo_preco, 'estimado') AS tipo_preco
+                    COALESCE(fp.tipo_preco, 'estimado') AS tipo_preco,
+                    COALESCE(i.tipo_objeto, 'material') AS tipo_objeto
                 FROM fontes_preco fp
                 JOIN itens i          ON fp.item_id       = i.id
                 JOIN contratacoes ct  ON i.contratacao_id = ct.id
@@ -182,7 +196,8 @@ class AnaliseService:
                     o.razao_social           AS orgao,
                     0.75::numeric            AS score_confianca,
                     ct.numero_controle_pncp  AS numero_controle_pncp,
-                    COALESCE(i.tipo_preco, 'estimado') AS tipo_preco
+                    COALESCE(i.tipo_preco, 'estimado') AS tipo_preco,
+                    COALESCE(i.tipo_objeto, 'material') AS tipo_objeto
                 FROM itens i
                 JOIN contratacoes ct ON i.contratacao_id = ct.id
                 JOIN orgaos o        ON ct.orgao_id      = o.id
@@ -233,6 +248,11 @@ class AnaliseService:
                 filtros_a.append("o.municipio ILIKE :municipio")
                 filtros_b.append("o.municipio ILIKE :municipio")
                 params["municipio"] = f"%{municipio}%"
+
+            if tipo_objeto_norm:
+                filtros_a.append("COALESCE(i.tipo_objeto, 'material') = :tipo_objeto")
+                filtros_b.append("COALESCE(i.tipo_objeto, 'material') = :tipo_objeto")
+                params["tipo_objeto"] = tipo_objeto_norm
 
             if filtros_a:
                 sql_a += " AND " + " AND ".join(filtros_a)
@@ -296,6 +316,7 @@ class AnaliseService:
                     "numero_controle_pncp": numero_controle,
                     "pncp_url": pncp_url,
                     "tipo_preco": getattr(r, "tipo_preco", "estimado") or "estimado",
+                    "tipo_objeto": getattr(r, "tipo_objeto", "material") or "material",
                 })
 
             return {
@@ -307,6 +328,7 @@ class AnaliseService:
                 "filtros_aplicados": {
                     "uf": uf,
                     "categoria": categoria,
+                    "tipo_objeto": tipo_objeto_norm,
                     "data_inicio": data_inicio,
                     "data_fim": data_fim,
                     "preco_min": preco_min,
@@ -326,6 +348,7 @@ class AnaliseService:
         categoria: str,
         ufs: list[str] | None = None,
         meses: int = 6,
+        tipo_objeto: str | None = None,
     ) -> dict[str, Any]:
         """Retorna tendências de preço mensal por categoria e UF."""
         db = _get_session()
@@ -333,6 +356,11 @@ class AnaliseService:
             ufs_alvo = ufs if ufs else ["SP", "RJ", "MG", "BA", "RS"]
             ufs_placeholder = ", ".join(f":uf{i}" for i in range(len(ufs_alvo)))
             params: dict[str, Any] = {"categoria": f"%{categoria}%", "meses": meses}
+            tipo_objeto_norm = _normalize_tipo_objeto(tipo_objeto)
+            tipo_objeto_filter = ""
+            if tipo_objeto_norm:
+                params["tipo_objeto"] = tipo_objeto_norm
+                tipo_objeto_filter = " AND COALESCE(i.tipo_objeto, 'material') = :tipo_objeto"
             for i, u in enumerate(ufs_alvo):
                 params[f"uf{i}"] = u.upper()
 
@@ -350,6 +378,7 @@ class AnaliseService:
                   AND c.nome ILIKE :categoria
                   AND fp.uf IN ({ufs_placeholder})
                   AND fp.data_referencia >= CURRENT_DATE - INTERVAL '1 month' * :meses
+                  {tipo_objeto_filter}
                 GROUP BY fp.uf, periodo
                 ORDER BY fp.uf, periodo
             """
@@ -414,6 +443,7 @@ class AnaliseService:
         self,
         categoria: str,
         ufs: list[str] | None = None,
+        tipo_objeto: str | None = None,
     ) -> dict[str, Any]:
         """Compara preços de uma categoria entre múltiplas UFs."""
         db = _get_session()
@@ -421,6 +451,11 @@ class AnaliseService:
             ufs_alvo = ufs if ufs else UFS_VALIDADAS
             ufs_placeholder = ", ".join(f":uf{i}" for i in range(len(ufs_alvo)))
             params: dict[str, Any] = {"categoria": f"%{categoria}%"}
+            tipo_objeto_norm = _normalize_tipo_objeto(tipo_objeto)
+            tipo_objeto_filter = ""
+            if tipo_objeto_norm:
+                params["tipo_objeto"] = tipo_objeto_norm
+                tipo_objeto_filter = " AND COALESCE(i.tipo_objeto, 'material') = :tipo_objeto"
             for i, u in enumerate(ufs_alvo):
                 params[f"uf{i}"] = u.upper()
 
@@ -439,6 +474,7 @@ class AnaliseService:
                   AND fp.outlier_flag = false
                   AND c.nome ILIKE :categoria
                   AND fp.uf IN ({ufs_placeholder})
+                  {tipo_objeto_filter}
                 GROUP BY fp.uf
                 ORDER BY preco_medio ASC
             """
@@ -492,6 +528,7 @@ class AnaliseService:
         self,
         ufs: list[str] | None = None,
         categoria: str | None = None,
+        tipo_objeto: str | None = None,
     ) -> dict[str, Any]:
         """Retorna resumo agregado para o dashboard principal.
 
@@ -505,6 +542,12 @@ class AnaliseService:
             uf_filter_o = ""
             cat_filter = ""
             cat_filter_desc = ""
+            tipo_objeto_filter = ""
+
+            tipo_objeto_norm = _normalize_tipo_objeto(tipo_objeto)
+            if tipo_objeto_norm:
+                params["tipo_objeto"] = tipo_objeto_norm
+                tipo_objeto_filter = " AND COALESCE(i.tipo_objeto, 'material') = :tipo_objeto"
 
             if ufs:
                 ufs_ph = ", ".join(f":uf{i}" for i in range(len(ufs)))
@@ -541,6 +584,7 @@ class AnaliseService:
                       AND fp.preco_unitario > 0
                     {uf_filter_fp}
                     {cat_filter}
+                    {tipo_objeto_filter}
 
                     UNION ALL
 
@@ -558,6 +602,7 @@ class AnaliseService:
                       )
                     {uf_filter_o}
                     {cat_filter_desc}
+                    {tipo_objeto_filter}
                 ) sub
             """
             kpi_row = db.execute(text(kpi_sql), params).fetchone()
@@ -577,6 +622,7 @@ class AnaliseService:
                   AND fp.outlier_flag = false
                 {uf_filter_fp}
                 {cat_filter}
+                {tipo_objeto_filter}
             """
             total_categorias = db.execute(text(cat_sql), params).scalar() or 0
 
@@ -604,6 +650,7 @@ class AnaliseService:
                       AND fp.preco_unitario > 0
                     {uf_filter_fp}
                     {cat_filter}
+                    {tipo_objeto_filter}
 
                     UNION ALL
 
@@ -621,6 +668,7 @@ class AnaliseService:
                       )
                     {uf_filter_o}
                     {cat_filter_desc}
+                    {tipo_objeto_filter}
                 ) sub
                 GROUP BY uf
                 ORDER BY uf
@@ -683,6 +731,7 @@ class AnaliseService:
         self,
         uf: str | None = None,
         categoria: str | None = None,
+        tipo_objeto: str | None = None,
         municipio: str | None = None,
         data_inicio: str | None = None,
         data_fim: str | None = None,
@@ -693,6 +742,7 @@ class AnaliseService:
         resultado = self.listar_precos(
             uf=uf,
             categoria=categoria,
+            tipo_objeto=tipo_objeto,
             municipio=municipio,
             data_inicio=data_inicio,
             data_fim=data_fim,
@@ -714,6 +764,7 @@ class AnaliseService:
                 item["id"],
                 item["uf"],
                 item["categoria"],
+                item.get("tipo_objeto", "material"),
                 item["descricao"],
                 f"{item['preco_unitario']:.2f}",
                 item["unidade"],
@@ -736,6 +787,7 @@ class AnaliseService:
         self,
         descricao: str,
         uf: str | None = None,
+        tipo_objeto: str | None = None,
         limite: int = 100,
     ) -> dict[str, Any]:
         """Retorna histórico cronológico de preços para uma descrição de item."""
@@ -748,6 +800,12 @@ class AnaliseService:
                 uf_filter = "AND o.uf = :uf"
                 params["uf"] = uf.upper()
 
+            tipo_objeto_norm = _normalize_tipo_objeto(tipo_objeto)
+            tipo_objeto_filter = ""
+            if tipo_objeto_norm:
+                tipo_objeto_filter = "AND COALESCE(i.tipo_objeto, 'material') = :tipo_objeto"
+                params["tipo_objeto"] = tipo_objeto_norm
+
             sql = f"""
                 (
                     SELECT
@@ -757,7 +815,8 @@ class AnaliseService:
                         o.municipio                       AS municipio,
                         o.uf                              AS uf,
                         COALESCE(fp.url_origem, '')       AS pncp_url,
-                        COALESCE(fp.qualidade_tipo, 'ESTIMADO') AS tipo_preco
+                        COALESCE(fp.qualidade_tipo, 'ESTIMADO') AS tipo_preco,
+                        COALESCE(i.tipo_objeto, 'material') AS tipo_objeto
                     FROM fontes_preco fp
                     JOIN itens i          ON fp.item_id       = i.id
                     JOIN contratacoes ct  ON i.contratacao_id  = ct.id
@@ -767,6 +826,7 @@ class AnaliseService:
                       AND fp.preco_unitario > 0
                       AND i.descricao ILIKE :descricao
                       {uf_filter}
+                      {tipo_objeto_filter}
                 )
                 UNION ALL
                 (
@@ -776,8 +836,17 @@ class AnaliseService:
                         o.razao_social                    AS orgao,
                         o.municipio                       AS municipio,
                         o.uf                              AS uf,
-                        ''                                AS pncp_url,
-                        COALESCE(i.tipo_preco, 'estimado') AS tipo_preco
+                        CASE
+                            WHEN ct.numero_controle_pncp IS NOT NULL
+                                 AND ct.numero_controle_pncp LIKE '%-%/%'
+                            THEN 'https://pncp.gov.br/app/editais/'
+                                 || REPLACE(REPLACE(REPLACE(o.cnpj, '.', ''), '/', ''), '-', '')
+                                 || '/' || SPLIT_PART(SPLIT_PART(ct.numero_controle_pncp, '/', 2), ' ', 1)
+                                 || '/' || LPAD(SPLIT_PART(SPLIT_PART(ct.numero_controle_pncp, '-', 3), '/', 1), 6, '0')
+                            ELSE ''
+                        END                               AS pncp_url,
+                        COALESCE(i.tipo_preco, 'estimado') AS tipo_preco,
+                        COALESCE(i.tipo_objeto, 'material') AS tipo_objeto
                     FROM itens i
                     JOIN contratacoes ct ON i.contratacao_id = ct.id
                     JOIN orgaos o        ON ct.orgao_id      = o.id
@@ -788,6 +857,7 @@ class AnaliseService:
                           SELECT 1 FROM fontes_preco fp WHERE fp.item_id = i.id
                       )
                       {uf_filter}
+                      {tipo_objeto_filter}
                 )
                 ORDER BY data DESC NULLS LAST
                 LIMIT :limite
@@ -806,6 +876,7 @@ class AnaliseService:
                     "uf": r.uf or "",
                     "pncp_url": r.pncp_url or "",
                     "tipo_preco": (r.tipo_preco or "estimado").lower(),
+                    "tipo_objeto": (r.tipo_objeto or "material").lower(),
                 })
 
             return {
@@ -823,10 +894,11 @@ class AnaliseService:
         self,
         descricao: str,
         uf: str | None = None,
+        tipo_objeto: str | None = None,
     ) -> dict[str, Any]:
         """Retorna comparativo de um item: histórico local + benchmark por UF."""
         # Reutiliza histórico
-        hist = self.get_historico_item(descricao, uf=uf, limite=500)
+        hist = self.get_historico_item(descricao, uf=uf, tipo_objeto=tipo_objeto, limite=500)
 
         db = _get_session()
         try:
@@ -849,6 +921,7 @@ class AnaliseService:
                     WHERE fp.ativo = true
                       AND fp.preco_unitario > 0
                       AND i.descricao ILIKE :descricao
+                      {tipo_objeto_filter}
 
                     UNION ALL
 

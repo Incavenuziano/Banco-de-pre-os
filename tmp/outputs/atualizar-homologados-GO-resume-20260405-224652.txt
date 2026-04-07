@@ -1,0 +1,10 @@
+2026-04-05 22:46:54,188 INFO Contratações a processar: 41215 (uf=GO, limit=0, dry_run=False)
+Traceback (most recent call last):
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 365, in <module>
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 252, in main
+    stats["contratacoes_com_homologado"] += 1
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+

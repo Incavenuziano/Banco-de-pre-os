@@ -1,0 +1,60 @@
+2026-04-06 18:44:11,223 INFO Contratações a processar: 27274 (uf=GO, limit=0, dry_run=False)
+2026-04-06 18:45:38,538 INFO [100/27274] atualiz=59 sem_resultado=393 erros=0
+2026-04-06 18:47:02,827 INFO [200/27274] atualiz=113 sem_resultado=786 erros=0
+2026-04-06 18:48:24,661 INFO [300/27274] atualiz=172 sem_resultado=1140 erros=1
+2026-04-06 18:49:46,949 INFO [400/27274] atualiz=233 sem_resultado=1517 erros=1
+2026-04-06 18:50:54,535 INFO [500/27274] atualiz=247 sem_resultado=1935 erros=1
+2026-04-06 18:52:06,117 INFO [600/27274] atualiz=270 sem_resultado=2343 erros=1
+2026-04-06 18:53:23,109 INFO [700/27274] atualiz=312 sem_resultado=2769 erros=1
+2026-04-06 18:54:52,772 INFO [800/27274] atualiz=395 sem_resultado=3143 erros=2
+2026-04-06 18:56:07,748 INFO [900/27274] atualiz=440 sem_resultado=3486 erros=3
+2026-04-06 18:57:20,566 INFO [1000/27274] atualiz=479 sem_resultado=3836 erros=3
+2026-04-06 18:58:28,566 INFO [1100/27274] atualiz=504 sem_resultado=4196 erros=4
+2026-04-06 18:59:56,708 INFO [1200/27274] atualiz=590 sem_resultado=4563 erros=4
+2026-04-06 19:01:06,238 INFO [1300/27274] atualiz=630 sem_resultado=4874 erros=4
+2026-04-06 19:02:23,288 INFO [1400/27274] atualiz=685 sem_resultado=5251 erros=4
+2026-04-06 19:03:46,674 INFO [1500/27274] atualiz=755 sem_resultado=5594 erros=4
+2026-04-06 19:05:03,431 INFO [1600/27274] atualiz=809 sem_resultado=5961 erros=5
+2026-04-06 19:06:26,253 INFO [1700/27274] atualiz=874 sem_resultado=6345 erros=5
+2026-04-06 19:07:35,305 INFO [1800/27274] atualiz=906 sem_resultado=6718 erros=5
+2026-04-06 19:09:59,678 INFO [1900/27274] atualiz=1001 sem_resultado=7123 erros=6
+2026-04-06 19:11:23,166 INFO [2000/27274] atualiz=1056 sem_resultado=7523 erros=6
+2026-04-06 19:12:55,981 INFO [2100/27274] atualiz=1113 sem_resultado=7891 erros=6
+2026-04-06 19:14:42,286 INFO [2200/27274] atualiz=1175 sem_resultado=8316 erros=6
+2026-04-06 19:16:01,952 INFO [2300/27274] atualiz=1225 sem_resultado=8716 erros=6
+2026-04-06 19:17:37,931 INFO [2400/27274] atualiz=1298 sem_resultado=9044 erros=7
+2026-04-06 19:18:51,907 INFO [2500/27274] atualiz=1340 sem_resultado=9389 erros=7
+2026-04-06 19:20:50,492 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: timeout expired
+
+2026-04-06 19:21:05,677 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: timeout expired
+
+2026-04-06 19:21:16,565 WARNING Conexão falhou (tentativa 3/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-06 19:21:32,361 WARNING Conexão falhou (tentativa 4/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is not yet accepting connections
+DETAIL:  Consistent recovery state has not been yet reached.
+
+2026-04-06 19:22:00,921 WARNING Conexão falhou (tentativa 5/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+Traceback (most recent call last):
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 132, in refresh_conn_if_needed
+    cur.execute("SELECT 1")
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 391, in <module>
+    main()
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 223, in main
+    refresh_conn_if_needed()
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 138, in refresh_conn_if_needed
+    conn = get_conn()
+           ^^^^^^^^^^
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 121, in get_conn
+    raise RuntimeError("Não foi possível conectar ao banco após 5 tentativas")
+RuntimeError: Não foi possível conectar ao banco após 5 tentativas

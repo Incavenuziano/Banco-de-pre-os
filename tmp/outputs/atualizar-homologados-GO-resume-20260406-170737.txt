@@ -1,0 +1,1 @@
+2026-04-06 17:07:48,946 INFO Contratações a processar: 27274 (uf=GO, limit=0, dry_run=False)

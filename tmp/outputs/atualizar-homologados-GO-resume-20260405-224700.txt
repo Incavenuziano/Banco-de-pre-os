@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 350, in <module>
+    main()
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 165, in main
+    cur.execute(sql, params)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+

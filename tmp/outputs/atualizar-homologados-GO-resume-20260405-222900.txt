@@ -1,0 +1,17 @@
+2026-04-05 22:35:15,866 INFO Contratações a processar: 41215 (uf=GO, limit=0, dry_run=False)
+2026-04-05 22:37:17,031 INFO [100/41215] atualiz=59 sem_resultado=393 erros=0
+2026-04-05 22:38:45,997 INFO [200/41215] atualiz=113 sem_resultado=786 erros=0
+2026-04-05 22:40:18,113 INFO [300/41215] atualiz=172 sem_resultado=1140 erros=1
+2026-04-05 22:41:53,948 INFO [400/41215] atualiz=233 sem_resultado=1517 erros=1
+2026-04-05 22:43:05,577 INFO [500/41215] atualiz=247 sem_resultado=1935 erros=1
+2026-04-05 22:44:30,431 INFO [600/41215] atualiz=270 sem_resultado=2343 erros=1
+2026-04-05 22:46:03,738 INFO [700/41215] atualiz=312 sem_resultado=2769 erros=1
+Traceback (most recent call last):
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 347, in <module>
+    main()
+  File "/home/danilo/.openclaw/workspace/siriguejo/projetos/banco-de-precos/scripts/atualizar_precos_homologados.py", line 206, in main
+    cur.execute("""
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+

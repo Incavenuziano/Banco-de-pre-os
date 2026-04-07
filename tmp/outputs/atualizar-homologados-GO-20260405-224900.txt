@@ -1,0 +1,81 @@
+2026-04-05 22:51:03,313 INFO Contratações a processar: 41215 (uf=GO, limit=0, dry_run=False)
+2026-04-05 22:52:44,016 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 22:52:44,546 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 22:53:00,157 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: timeout expired
+
+2026-04-05 22:53:58,185 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 22:53:58,278 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 22:54:52,269 INFO [100/41215] atualiz=59 sem_resultado=393 erros=0
+2026-04-05 22:57:04,296 INFO [200/41215] atualiz=113 sem_resultado=786 erros=0
+2026-04-05 22:58:40,084 INFO [300/41215] atualiz=172 sem_resultado=1140 erros=1
+2026-04-05 23:00:15,794 INFO [400/41215] atualiz=233 sem_resultado=1517 erros=1
+2026-04-05 23:01:25,089 INFO [500/41215] atualiz=247 sem_resultado=1935 erros=1
+2026-04-05 23:02:37,172 INFO [600/41215] atualiz=270 sem_resultado=2343 erros=1
+2026-04-05 23:04:07,446 INFO [700/41215] atualiz=312 sem_resultado=2769 erros=1
+2026-04-05 23:05:45,630 INFO [800/41215] atualiz=395 sem_resultado=3143 erros=2
+2026-04-05 23:07:17,099 INFO [900/41215] atualiz=440 sem_resultado=3486 erros=3
+2026-04-05 23:08:37,610 INFO [1000/41215] atualiz=479 sem_resultado=3836 erros=3
+2026-04-05 23:09:51,169 INFO [1100/41215] atualiz=503 sem_resultado=4197 erros=4
+2026-04-05 23:11:33,786 INFO [1200/41215] atualiz=589 sem_resultado=4564 erros=4
+2026-04-05 23:12:59,664 INFO [1300/41215] atualiz=629 sem_resultado=4875 erros=4
+2026-04-05 23:14:30,343 INFO [1400/41215] atualiz=684 sem_resultado=5252 erros=4
+2026-04-05 23:16:03,575 INFO [1500/41215] atualiz=754 sem_resultado=5595 erros=4
+2026-04-05 23:17:27,383 INFO [1600/41215] atualiz=808 sem_resultado=5962 erros=5
+2026-04-05 23:19:01,216 INFO [1700/41215] atualiz=873 sem_resultado=6346 erros=5
+2026-04-05 23:20:24,370 INFO [1800/41215] atualiz=905 sem_resultado=6719 erros=5
+2026-04-05 23:22:34,620 INFO [1900/41215] atualiz=1000 sem_resultado=7124 erros=6
+2026-04-05 23:24:07,554 INFO [2000/41215] atualiz=1055 sem_resultado=7524 erros=6
+2026-04-05 23:25:34,775 INFO [2100/41215] atualiz=1112 sem_resultado=7892 erros=6
+2026-04-05 23:27:05,711 INFO [2200/41215] atualiz=1174 sem_resultado=8317 erros=6
+2026-04-05 23:28:30,127 INFO [2300/41215] atualiz=1224 sem_resultado=8717 erros=6
+2026-04-05 23:30:06,316 INFO [2400/41215] atualiz=1297 sem_resultado=9045 erros=7
+2026-04-05 23:31:51,138 INFO [2500/41215] atualiz=1379 sem_resultado=9332 erros=7
+2026-04-05 23:35:19,354 INFO [2600/41215] atualiz=1689 sem_resultado=9398 erros=7
+2026-04-05 23:38:26,589 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 23:38:34,136 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:38:39,582 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is not yet accepting connections
+DETAIL:  Consistent recovery state has not been yet reached.
+
+2026-04-05 23:41:16,611 WARNING OperationalError (tentativa 2/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 23:41:24,129 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:41:30,526 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:41:42,260 WARNING Conexão falhou (tentativa 3/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:43:10,640 INFO [2700/41215] atualiz=1954 sem_resultado=9468 erros=7
+2026-04-05 23:43:41,034 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 23:43:42,690 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:45:23,648 WARNING OperationalError (tentativa 1/3), reconectando: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-04-05 23:45:23,953 WARNING Conexão falhou (tentativa 1/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:45:29,468 WARNING Conexão falhou (tentativa 2/5): connection to server at "localhost" (127.0.0.1), port 5435 failed: FATAL:  the database system is in recovery mode
+
+2026-04-05 23:48:23,930 INFO [2800/41215] atualiz=2158 sem_resultado=9552 erros=7
+2026-04-05 23:51:41,808 INFO [2900/41215] atualiz=2398 sem_resultado=9638 erros=7
+2026-04-05 23:54:22,518 INFO [3000/41215] atualiz=2608 sem_resultado=9742 erros=7
+2026-04-05 23:56:59,085 INFO [3100/41215] atualiz=2800 sem_resultado=9871 erros=7
+2026-04-06 00:00:23,140 INFO [3200/41215] atualiz=3076 sem_resultado=9973 erros=7
+2026-04-06 00:03:21,904 INFO [3300/41215] atualiz=3354 sem_resultado=10024 erros=7

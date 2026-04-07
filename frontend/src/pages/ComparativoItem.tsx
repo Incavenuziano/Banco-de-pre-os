@@ -262,7 +262,7 @@ export const ComparativoItem: React.FC = () => {
                   <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        {["Data", "Preço Unit.", "Tipo", "Órgão", "Município", "UF"].map((h) => (
+                        {["Data", "Preço Unit.", "Tipo", "Órgão", "Município", "UF", "PNCP"].map((h) => (
                           <th
                             key={h}
                             className="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-600"
@@ -293,6 +293,20 @@ export const ComparativoItem: React.FC = () => {
                           </td>
                           <td className="px-3 py-2">{h.municipio}</td>
                           <td className="px-3 py-2">{h.uf}</td>
+                          <td className="px-3 py-2">
+                            {h.pncp_url ? (
+                              <a
+                                href={h.pncp_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 hover:underline text-xs font-medium"
+                              >
+                                Ver ↗
+                              </a>
+                            ) : (
+                              <span className="text-gray-300 text-xs">—</span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
