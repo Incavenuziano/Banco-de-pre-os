@@ -1,5 +1,8 @@
 """Aplicação FastAPI — Banco de Preços."""
 
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 from fastapi import FastAPI
 
 from app.routers.precos import router as precos_router
@@ -22,10 +25,45 @@ from app.services.observabilidade_service import observabilidade
 
 from app.middleware.security_headers import SecurityHeadersMiddleware
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Gerencia o ciclo de vida da aplicação.
+
+    Startup: inicia o scheduler de ingestão automática.
+    Shutdown: desliga o scheduler de forma limpa.
+    """
+    scheduler = None
+    try:
+        from app.services.scheduler import criar_scheduler
+
+        scheduler = criar_scheduler()
+        scheduler.start()
+        logger.info("Scheduler de ingestão iniciado com %d jobs", len(scheduler.get_jobs()))
+    except ImportError:
+        logger.warning(
+            "APScheduler não instalado — ingestão automática desabilitada. "
+            "Instale com: pip install 'apscheduler>=3.10,<4'"
+        )
+    except Exception:
+        logger.exception("Falha ao iniciar scheduler — ingestão automática desabilitada")
+
+    yield
+
+    if scheduler is not None:
+        scheduler.shutdown(wait=False)
+        logger.info("Scheduler de ingestão encerrado")
+
+
 app = FastAPI(
     title="Banco de Preços",
     description="API do Banco de Preços para pesquisa de preços em licitações municipais.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(SecurityHeadersMiddleware)

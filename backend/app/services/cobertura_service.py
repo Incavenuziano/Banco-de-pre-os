@@ -1,6 +1,9 @@
-"""Serviço de cobertura — municípios prioritários e índice de cobertura por UF."""
+"""Serviço de cobertura — municípios prioritários e índice de cobertura por UF/município."""
 
 from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
 
 
 MUNICIPIOS_PRIORITARIOS: dict[str, list[str]] = {
@@ -46,9 +49,81 @@ MUNICIPIOS_PRIORITARIOS: dict[str, list[str]] = {
     ],
 }
 
+# Lista expandida dos 50 principais municípios goianos por população/relevância
+# para acompanhamento de cobertura de dados do PNCP.
+MUNICIPIOS_GOIAS: list[str] = [
+    # Top 10 por população
+    "Goiânia",
+    "Aparecida de Goiânia",
+    "Anápolis",
+    "Rio Verde",
+    "Luziânia",
+    "Águas Lindas de Goiás",
+    "Valparaíso de Goiás",
+    "Trindade",
+    "Formosa",
+    "Novo Gama",
+    # Municípios médios com alta atividade licitatória
+    "Caldas Novas",
+    "Itumbiara",
+    "Jataí",
+    "Catalão",
+    "Senador Canedo",
+    "Goianésia",
+    "Mineiros",
+    "Inhumas",
+    "Uruaçu",
+    "Goiás",
+    "Iporá",
+    "Morrinhos",
+    "Quirinópolis",
+    "São Luís de Montes Belos",
+    "Niquelândia",
+    "Porangatu",
+    "Ceres",
+    "Rubiataba",
+    "Goianira",
+    # Municípios pequenos relevantes
+    "Alexânia",
+    "Anicuns",
+    "Bela Vista de Goiás",
+    "Cristalina",
+    "Cumari",
+    "Edéia",
+    "Hidrolandia",
+    "Ipameri",
+    "Itaberaí",
+    "Itapaci",
+    "Itapirapuã",
+    "Jaraguá",
+    "Jussara",
+    "Nerópolis",
+    "Orizona",
+    "Paraúna",
+    "Pires do Rio",
+    "Planaltina de Goiás",
+    "Posse",
+    "Santa Helena de Goiás",
+    "Silvânia",
+]
+
+# Thresholds para classificação de cobertura por município
+# Baseados em critérios práticos: municípios pequenos de GO têm em média
+# 5-20 pregões/ano no PNCP, municípios grandes têm 50-200+.
+_THRESHOLDS_COBERTURA = {
+    "ALTA":         {"min_amostras": 50, "min_categorias": 5},
+    "MEDIA":        {"min_amostras": 20, "min_categorias": 3},
+    "BAIXA":        {"min_amostras": 5,  "min_categorias": 1},
+    # Abaixo disso: INSUFICIENTE
+}
+
 
 class CoberturaService:
     """Consulta municípios prioritários e calcula índice de cobertura."""
+
+    # ─────────────────────────────────────────────────────
+    # Métodos originais (compatibilidade total)
+    # ─────────────────────────────────────────────────────
 
     def obter_municipios_por_uf(self, uf: str) -> list[str]:
         """Retorna lista de municípios prioritários de uma UF.
@@ -101,4 +176,123 @@ class CoberturaService:
             "nivel": nivel,
             "n_amostras": n_amostras,
             "n_categorias": n_categorias,
+        }
+
+    # ─────────────────────────────────────────────────────
+    # Métodos novos: cobertura por município goiano
+    # ─────────────────────────────────────────────────────
+
+    def obter_todos_municipios_go(self) -> list[str]:
+        """Retorna lista completa dos 50 principais municípios goianos monitorados.
+
+        Returns:
+            Lista de nomes de municípios de Goiás.
+        """
+        return list(MUNICIPIOS_GOIAS)
+
+    def calcular_cobertura_municipio(
+        self,
+        municipio: str,
+        uf: str,
+        n_amostras: int,
+        n_categorias: int,
+        ultima_atualizacao: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Calcula o nível de cobertura de dados para um município específico.
+
+        Níveis:
+          ALTA        — ≥50 amostras e ≥5 categorias
+          MEDIA       — ≥20 amostras e ≥3 categorias
+          BAIXA       — ≥5 amostras e ≥1 categoria
+          INSUFICIENTE — abaixo dos critérios de BAIXA
+
+        Args:
+            municipio: Nome do município.
+            uf: Sigla da UF (ex: 'GO').
+            n_amostras: Número de fontes de preço ativas para o município.
+            n_categorias: Número de categorias distintas cobertas.
+            ultima_atualizacao: Timestamp da última ingestão (opcional).
+
+        Returns:
+            Dict com municipio, uf, n_amostras, n_categorias, nivel e
+            ultima_atualizacao (ISO string ou None).
+        """
+        nivel = "INSUFICIENTE"
+        for nome_nivel, thr in _THRESHOLDS_COBERTURA.items():
+            if n_amostras >= thr["min_amostras"] and n_categorias >= thr["min_categorias"]:
+                nivel = nome_nivel
+                break
+
+        return {
+            "municipio": municipio,
+            "uf": uf.upper(),
+            "n_amostras": n_amostras,
+            "n_categorias": n_categorias,
+            "nivel": nivel,
+            "ultima_atualizacao": (
+                ultima_atualizacao.isoformat() if ultima_atualizacao else None
+            ),
+        }
+
+    def obter_mapa_cobertura_go(
+        self,
+        contagens: dict[str, dict[str, int]] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Retorna o mapa de cobertura de todos os municípios goianos monitorados.
+
+        Args:
+            contagens: Dict {municipio: {n_amostras: int, n_categorias: int}}.
+                       Se None, todos os municípios terão nível INSUFICIENTE
+                       (útil para inicialização ou quando o banco não está disponível).
+
+        Returns:
+            Lista de dicts com cobertura por município, ordenada por nível
+            (ALTA → MEDIA → BAIXA → INSUFICIENTE) e depois alfabeticamente.
+        """
+        contagens = contagens or {}
+        resultado: list[dict[str, Any]] = []
+
+        for municipio in MUNICIPIOS_GOIAS:
+            dados = contagens.get(municipio, {"n_amostras": 0, "n_categorias": 0})
+            status = self.calcular_cobertura_municipio(
+                municipio=municipio,
+                uf="GO",
+                n_amostras=dados.get("n_amostras", 0),
+                n_categorias=dados.get("n_categorias", 0),
+            )
+            resultado.append(status)
+
+        # Ordena por nível (ALTA primeiro) depois por nome
+        _ordem_nivel = {"ALTA": 0, "MEDIA": 1, "BAIXA": 2, "INSUFICIENTE": 3}
+        resultado.sort(key=lambda r: (_ordem_nivel.get(r["nivel"], 4), r["municipio"]))
+
+        return resultado
+
+    def resumo_cobertura_go(
+        self, contagens: dict[str, dict[str, int]] | None = None
+    ) -> dict[str, Any]:
+        """Retorna resumo estatístico da cobertura em Goiás.
+
+        Args:
+            contagens: Dict {municipio: {n_amostras, n_categorias}}.
+
+        Returns:
+            Dict com totais por nível, total de municípios e percentual coberto.
+        """
+        mapa = self.obter_mapa_cobertura_go(contagens)
+
+        contagem_niveis: dict[str, int] = {
+            "ALTA": 0, "MEDIA": 0, "BAIXA": 0, "INSUFICIENTE": 0
+        }
+        for item in mapa:
+            contagem_niveis[item["nivel"]] = contagem_niveis.get(item["nivel"], 0) + 1
+
+        total = len(mapa)
+        cobertos = contagem_niveis["ALTA"] + contagem_niveis["MEDIA"] + contagem_niveis["BAIXA"]
+
+        return {
+            "total_municipios": total,
+            "municipios_cobertos": cobertos,
+            "percentual_coberto": round(cobertos / total * 100, 1) if total else 0.0,
+            "por_nivel": contagem_niveis,
         }
