@@ -18,6 +18,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import logging
 import time
@@ -29,6 +30,8 @@ import requests
 import psycopg2
 import psycopg2.extras
 import os
+
+from app.services.validacao_ingestao import StatusValidacao, validar_item
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +135,7 @@ class ItemRaw:
     catmat: str | None
     tipo_preco: str = "estimado"
     tipo_objeto: str = "material"
+    objeto_contratacao: str | None = None  # contexto para validação de cópia indevida
 
 
 @dataclass
@@ -141,6 +145,8 @@ class ResultadoColeta:
     total_itens: int = 0
     novas_contratacoes: int = 0
     novos_itens: int = 0
+    quarentena: int = 0   # itens suspeitos que aguardam revisão
+    rejeitados: int = 0   # itens inválidos descartados
     erros: list[str] = field(default_factory=list)
     duracao_s: float = 0.0
 
@@ -239,7 +245,12 @@ def buscar_contratacoes_uf(
     return resultados
 
 
-def buscar_itens(cnpj: str, ano: int, seq: int) -> list[ItemRaw]:
+def buscar_itens(
+    cnpj: str,
+    ano: int,
+    seq: int,
+    objeto_contratacao: str | None = None,
+) -> list[ItemRaw]:
     """Busca itens de uma contratação, incluindo resultado homologado."""
     url = ITEMS_URL_TPL.format(cnpj=cnpj, ano=ano, seq=seq)
     data = _get_json(url)
@@ -283,6 +294,7 @@ def buscar_itens(cnpj: str, ano: int, seq: int) -> list[ItemRaw]:
             catmat=it.get("catalogoAquisicao", {}).get("codigo") if isinstance(it.get("catalogoAquisicao"), dict) else None,
             tipo_preco=tipo_preco,
             tipo_objeto=_infer_tipo_objeto(descricao_item),
+            objeto_contratacao=objeto_contratacao,
         ))
         time.sleep(SLEEP_ENTRE_ITENS)
 
@@ -343,11 +355,57 @@ def upsert_contratacao(cur, orgao_id: str, contratacao: ContratacaoRaw) -> tuple
     return str(cur.fetchone()[0]), False
 
 
-def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
-    """Insere itens (skip duplicados por contratacao_id + numero_item)."""
+def insert_itens(
+    cur,
+    contratacao_id: str,
+    itens: list[ItemRaw],
+    uf: str = "",
+    cnpj: str = "",
+) -> tuple[int, int, int]:
+    """Insere itens com portão de qualidade.
+
+    Cada item passa por validação antes do INSERT:
+      - REJEITADO  → descartado, contado em `rejeitados`
+      - QUARENTENA → salvo em itens_quarentena para revisão manual
+      - ACEITO     → inserido normalmente em itens
+
+    Returns:
+        Tupla (novos_validos, quarentena, rejeitados)
+    """
     novos = 0
+    quarentena = 0
+    rejeitados = 0
     novos_ids: list[tuple[str, str]] = []  # (item_id, descricao)
+
     for it in itens:
+        # ── Portão de qualidade ──────────────────────────────────────
+        validacao = validar_item(
+            descricao=it.descricao,
+            preco_unitario=it.valor_unitario,
+            quantidade=it.quantidade,
+            unidade=it.unidade,
+            data_referencia=None,          # data vem da contratação, não do item
+            cnpj=cnpj or None,
+            objeto_contratacao=it.objeto_contratacao,
+            categoria_nome=None,           # será classificado após insert
+            tipo_preco=it.tipo_preco,
+        )
+
+        if validacao.rejeitado:
+            rejeitados += 1
+            logger.debug(
+                "Item %d rejeitado: %s",
+                it.numero_item,
+                "; ".join(validacao.motivos_rejeicao),
+            )
+            continue
+
+        if validacao.em_quarentena:
+            quarentena += 1
+            _inserir_quarentena(cur, it, uf, cnpj, validacao.motivos_quarentena)
+            continue
+
+        # ── INSERT normal ────────────────────────────────────────────
         cur.execute("""
             INSERT INTO itens
                 (contratacao_id, numero_item, descricao, quantidade,
@@ -377,7 +435,38 @@ def insert_itens(cur, contratacao_id: str, itens: list[ItemRaw]) -> int:
     if novos_ids:
         _classificar_itens_novos(cur, novos_ids)
 
-    return novos
+    return novos, quarentena, rejeitados
+
+
+def _inserir_quarentena(
+    cur,
+    it: ItemRaw,
+    uf: str,
+    cnpj: str,
+    motivos: list[str],
+) -> None:
+    """Persiste item suspeito na tabela de quarentena."""
+    item_raw = {
+        "numero_item": it.numero_item,
+        "descricao": it.descricao,
+        "quantidade": it.quantidade,
+        "unidade": it.unidade,
+        "valor_unitario": it.valor_unitario,
+        "valor_total": it.valor_total,
+        "catmat": it.catmat,
+        "tipo_preco": it.tipo_preco,
+        "tipo_objeto": it.tipo_objeto,
+    }
+    try:
+        cur.execute(
+            """
+            INSERT INTO itens_quarentena (uf, cnpj, item_raw, motivo, status, criado_em)
+            VALUES (%s, %s, %s, %s, 'pendente', NOW())
+            """,
+            (uf or None, cnpj or None, json.dumps(item_raw), "; ".join(motivos)),
+        )
+    except Exception as e:
+        logger.warning("Falha ao inserir quarentena item %d: %s", it.numero_item, e)
 
 
 def _classificar_itens_novos(cur, itens: list[tuple[str, str]]) -> None:
@@ -523,10 +612,20 @@ def coletar_uf(
                     if is_nova:
                         resultado.novas_contratacoes += 1
                         # Buscar itens apenas para novas contratações
-                        itens = buscar_itens(contratacao.cnpj, contratacao.ano_compra, contratacao.sequencial_compra)
+                        itens = buscar_itens(
+                            contratacao.cnpj,
+                            contratacao.ano_compra,
+                            contratacao.sequencial_compra,
+                            objeto_contratacao=contratacao.objeto,
+                        )
                         resultado.total_itens += len(itens)
-                        novos_itens = insert_itens(cur, contratacao_id, itens)
+                        novos_itens, n_quarentena, n_rejeitados = insert_itens(
+                            cur, contratacao_id, itens,
+                            uf=uf, cnpj=contratacao.cnpj,
+                        )
                         resultado.novos_itens += novos_itens
+                        resultado.quarentena += n_quarentena
+                        resultado.rejeitados += n_rejeitados
 
                     conn.commit()
 
@@ -547,10 +646,12 @@ def coletar_uf(
 
     resultado.duracao_s = time.time() - inicio
     logger.info(
-        "Coleta finalizada UF=%s | contratos=%d novos=%d | itens=%d novos=%d | erros=%d | %.1fs",
+        "Coleta finalizada UF=%s | contratos=%d novos=%d | "
+        "itens=%d novos=%d quarentena=%d rejeitados=%d | erros=%d | %.1fs",
         uf, resultado.total_contratacoes, resultado.novas_contratacoes,
         resultado.total_itens, resultado.novos_itens,
-        len(resultado.erros), resultado.duracao_s
+        resultado.quarentena, resultado.rejeitados,
+        len(resultado.erros), resultado.duracao_s,
     )
     return resultado
 
@@ -611,7 +712,10 @@ if __name__ == "__main__":
     print(f"\n{'='*60}")
     print(f"UF: {resultado.uf}")
     print(f"Contratações coletadas: {resultado.total_contratacoes} ({resultado.novas_contratacoes} novas)")
-    print(f"Itens coletados: {resultado.total_itens} ({resultado.novos_itens} novos)")
+    print(f"Itens coletados:  {resultado.total_itens}")
+    print(f"  → Aceitos:      {resultado.novos_itens}")
+    print(f"  → Quarentena:   {resultado.quarentena}")
+    print(f"  → Rejeitados:   {resultado.rejeitados}")
     print(f"Erros: {len(resultado.erros)}")
     print(f"Duração: {resultado.duracao_s:.1f}s")
     if resultado.erros:
