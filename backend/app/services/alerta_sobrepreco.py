@@ -6,6 +6,7 @@ com percentis, desvio da mediana, e histórico de alertas.
 
 from __future__ import annotations
 
+import math
 import statistics
 from datetime import datetime
 from typing import Any
@@ -203,17 +204,20 @@ class AlertaSobreprecoService:
 
     @staticmethod
     def _z_para_percentil(z: float) -> int:
-        """Aproximação do percentil a partir do z-score (distribuição normal)."""
-        # Aproximação polinomial simplificada
+        """Converte z-score em percentil usando aproximação de Abramowitz & Stegun (26.2.17).
+
+        Erro máximo: |ε(z)| < 7.5e-8 — suficiente para fins de alerta de preço.
+        """
         if z < -3:
             return 1
         if z > 3:
             return 99
-        # Aproximação CDF normal
-        t = 1 / (1 + 0.2316419 * abs(z))
-        d = 0.3989422804014327  # 1/sqrt(2*pi)
-        p = d * (-z * z / 2).__class__(2.718281828) ** (-z * z / 2)
+        # PDF da normal padrão: φ(z) = (1/√(2π)) * exp(-z²/2)
+        t = 1.0 / (1.0 + 0.2316419 * abs(z))
+        phi = math.exp(-0.5 * z * z) / math.sqrt(2.0 * math.pi)
+        # Polinômio de Horner (coeficientes de A&S tabela 26.2.17)
         poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
+        # CDF: Φ(z) ≈ 1 - φ(z)*poly para z ≥ 0; Φ(z) = 1 - Φ(-z) para z < 0
         if z >= 0:
-            return min(99, max(1, int((1 - p * poly) * 100)))
-        return min(99, max(1, int(p * poly * 100)))
+            return min(99, max(1, int((1.0 - phi * poly) * 100)))
+        return min(99, max(1, int(phi * poly * 100)))

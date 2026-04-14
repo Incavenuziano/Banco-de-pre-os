@@ -170,7 +170,14 @@ def calcular_preco_referencial(
     precos_usados = precos
 
     if excluir_outliers and len(precos) >= 2:
-        marcados = marcar_outliers(precos, metodo="iqr")
+        # Escolhe o método ideal com base na distribuição dos dados.
+        # Percentil (p5-p95) só faz sentido com n >= 15; abaixo disso usa IQR.
+        if len(precos) >= 15:
+            calibracao = calibrar_limiar_outlier(precos)
+            metodo_outlier = calibracao["metodo_recomendado"]
+        else:
+            metodo_outlier = "iqr"
+        marcados = marcar_outliers(precos, metodo=metodo_outlier)
         precos_usados = [m["preco"] for m in marcados if not m["outlier"]]
         n_outliers = len(precos) - len(precos_usados)
         if not precos_usados:
@@ -320,7 +327,8 @@ def relatorio_qualidade_amostras(precos: list[float]) -> dict[str, Any]:
             "recomendacoes": ["Fonte insuficiente para relatório", "Ampliar período de pesquisa"],
         }
 
-    marcados = marcar_outliers(precos, metodo="iqr")
+    calibracao = calibrar_limiar_outlier(precos)
+    marcados = marcar_outliers(precos, metodo=calibracao["metodo_recomendado"])
     n_outliers = sum(1 for m in marcados if m["outlier"])
     pct_outliers = round(n_outliers / n * 100, 2) if n > 0 else 0.0
 

@@ -6,23 +6,69 @@ import unicodedata
 from datetime import date
 from typing import Any
 
+# Expressão usada para marcar limites de palavra ao compilar padrões de sinônimos
+_WB = r"\b"
+
 
 # Mapa de sinônimos de unidade para forma canônica
 _UNIDADE_MAP: dict[str, str] = {
+    # ── Unidade genérica ─────────────────────────────────────────────────────
     "UN": "UN",
     "UND": "UN",
     "UNID": "UN",
     "UNIDADE": "UN",
     "UNIDADES": "UN",
+    # ── Massa ────────────────────────────────────────────────────────────────
     "KG": "KG",
     "KILO": "KG",
     "QUILO": "KG",
     "QUILOGRAMA": "KG",
     "QUILOGRAMAS": "KG",
+    "G": "G",
+    "GR": "G",           # variante comum (ex: "500GR")
+    "GRAMA": "G",
+    "GRAMAS": "G",
+    "TON": "TON",
+    "TONELADA": "TON",
+    "TONELADAS": "TON",
+    # ── Farmacêutico / Saúde ─────────────────────────────────────────────────
+    "MG": "MG",          # miligrama — importante para medicamentos
+    "MILIGRAMA": "MG",
+    "MILIGRAMAS": "MG",
+    "MCG": "MCG",        # micrograma
+    "UG": "MCG",
+    "UI": "UI",          # unidade internacional (vacinas, hormônios)
+    "IU": "UI",
+    "CP": "CP",
+    "COMP": "CP",
+    "COMPRIMIDO": "CP",
+    "COMPRIMIDOS": "CP",
+    "CAP": "CAP",        # cápsula
+    "CAPSULA": "CAP",
+    "CAPSULAS": "CAP",
+    "CÁPSULA": "CAP",
+    "CÁPSULAS": "CAP",
+    "AMP": "AMP",
+    "AMPOLA": "AMP",
+    "AMPOLAS": "AMP",
+    "DS": "DS",          # dose
+    "DOSE": "DS",
+    "DOSES": "DS",
+    # ── Volume ───────────────────────────────────────────────────────────────
     "L": "L",
     "LT": "L",
     "LITRO": "L",
     "LITROS": "L",
+    "ML": "ML",
+    "MILILITRO": "ML",
+    "MILILITROS": "ML",
+    "GL": "GL",
+    "GALAO": "GL",
+    "GALÃO": "GL",
+    # ── Comprimento / Área / Volume ──────────────────────────────────────────
+    "CM": "CM",
+    "CENTIMETRO": "CM",
+    "CENTIMETROS": "CM",
     "M": "M",
     "METRO": "M",
     "METROS": "M",
@@ -34,6 +80,7 @@ _UNIDADE_MAP: dict[str, str] = {
     "M³": "M3",
     "METRO CUBICO": "M3",
     "METROS CUBICOS": "M3",
+    # ── Embalagem / Papelaria ─────────────────────────────────────────────────
     "CX": "CX",
     "CAIXA": "CX",
     "CAIXAS": "CX",
@@ -42,47 +89,46 @@ _UNIDADE_MAP: dict[str, str] = {
     "PECAS": "PC",
     "PEÇA": "PC",
     "PEÇAS": "PC",
+    "POTE": "PC",        # pote = container unitário
+    "POTES": "PC",
     "PCT": "PCT",
     "PACOTE": "PCT",
     "PACOTES": "PCT",
+    "SACHE": "PCT",      # sachê = pacote individual
+    "SACHÊ": "PCT",
     "FD": "FD",
     "FARDO": "FD",
     "FARDOS": "FD",
-    "GL": "GL",
-    "GALAO": "GL",
-    "GALÃO": "GL",
-    "RL": "RL",
-    "ROLO": "RL",
-    "ROLOS": "RL",
     "FR": "FR",
     "FRASCO": "FR",
     "FRASCOS": "FR",
+    "GARRAFA": "FR",     # garrafa = frasco de vidro/plástico
+    "GARRAFAS": "FR",
+    "VIDRO": "FR",       # "vidro de 500ml" = frasco
     "TB": "TB",
     "TUBO": "TB",
     "TUBOS": "TB",
+    "BISNAGA": "TB",     # bisnaga = tubo colapsível
+    "BISNAGAS": "TB",
+    "RL": "RL",
+    "ROLO": "RL",
+    "ROLOS": "RL",
     "SC": "SC",
     "SACO": "SC",
     "SACOS": "SC",
+    "RM": "RM",          # resma (papel)
+    "RESMA": "RM",
+    "RESMAS": "RM",
+    "FH": "FH",          # folha
+    "FL": "FH",
+    "FOLHA": "FH",
+    "FOLHAS": "FH",
+    "KT": "KT",          # kit
+    "KIT": "KT",
+    "KITS": "KT",
+    # ── Outros ───────────────────────────────────────────────────────────────
     "PAR": "PAR",
     "PARES": "PAR",
-    "CP": "CP",
-    "COMPRIMIDO": "CP",
-    "COMPRIMIDOS": "CP",
-    "AMP": "AMP",
-    "AMPOLA": "AMP",
-    "AMPOLAS": "AMP",
-    "ML": "ML",
-    "MILILITRO": "ML",
-    "MILILITROS": "ML",
-    "G": "G",
-    "GRAMA": "G",
-    "GRAMAS": "G",
-    "CM": "CM",
-    "CENTIMETRO": "CM",
-    "CENTIMETROS": "CM",
-    "TON": "TON",
-    "TONELADA": "TON",
-    "TONELADAS": "TON",
     "SERVICO": "SV",
     "SERVIÇO": "SV",
     "SV": "SV",
@@ -233,36 +279,46 @@ SINONIMOS_POR_UF: dict[str, dict[str, str]] = {
 }
 
 
+# Padrões compilados com word boundary para evitar substituições dentro de outras palavras.
+# Ex: "CAL" como sinônimo não pode substituir "CAL" dentro de "CALCÁRIO".
+# Compilados uma vez em nível de módulo para eficiência.
+_SINONIMOS_REGIONAIS_COMPILED: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(_WB + re.escape(sinonimo) + _WB, re.UNICODE), padrao)
+    for sinonimo, padrao in SINONIMOS_REGIONAIS.items()
+]
+
+_SINONIMOS_POR_UF_COMPILED: dict[str, list[tuple[re.Pattern[str], str]]] = {
+    uf: [
+        (re.compile(_WB + re.escape(sinonimo.upper()) + _WB, re.UNICODE), padrao.upper())
+        for sinonimo, padrao in sinonimos.items()
+    ]
+    for uf, sinonimos in SINONIMOS_POR_UF.items()
+}
+
+
 def normalizar_sinonimo_regional(
     texto: str, uf: str | None = None
 ) -> str:
     """Normaliza sinônimos regionais para termos padronizados.
 
+    Usa word boundary (\b) para evitar substituições parciais dentro de palavras.
+    Ex: "CAL HIDRATADA" é normalizado mas "CALCÁRIO" não é afetado.
+
     Primeiro aplica sinônimos gerais, depois os específicos por UF se disponível.
-
-    Args:
-        texto: Texto da descrição (em qualquer case).
-        uf: Sigla da UF para aplicar sinônimos específicos (opcional).
-
-    Returns:
-        Texto com sinônimos normalizados.
     """
     if not texto:
         return texto
 
     resultado = texto.upper().strip()
 
-    # Sinônimos gerais
-    for sinonimo, padrao in SINONIMOS_REGIONAIS.items():
-        if sinonimo in resultado:
-            resultado = resultado.replace(sinonimo, padrao)
+    # Sinônimos gerais — com word boundary (pré-compilados)
+    for pattern, padrao in _SINONIMOS_REGIONAIS_COMPILED:
+        resultado = pattern.sub(padrao, resultado)
 
-    # Sinônimos por UF
-    if uf and uf.upper() in SINONIMOS_POR_UF:
-        for sinonimo, padrao in SINONIMOS_POR_UF[uf.upper()].items():
-            sinonimo_up = sinonimo.upper()
-            if sinonimo_up in resultado:
-                resultado = resultado.replace(sinonimo_up, padrao.upper())
+    # Sinônimos por UF — com word boundary (pré-compilados)
+    if uf and uf.upper() in _SINONIMOS_POR_UF_COMPILED:
+        for pattern, padrao in _SINONIMOS_POR_UF_COMPILED[uf.upper()]:
+            resultado = pattern.sub(padrao, resultado)
 
     return resultado
 
