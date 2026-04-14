@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import logging
 import time
 from dataclasses import dataclass, field
@@ -31,6 +30,7 @@ import psycopg2
 import psycopg2.extras
 import os
 
+from app.services.classificador_tipo_objeto import inferir_tipo_objeto
 from app.services.validacao_ingestao import StatusValidacao, validar_item
 
 logger = logging.getLogger(__name__)
@@ -293,7 +293,7 @@ def buscar_itens(
             valor_total=_float_safe(it.get("valorTotal")),
             catmat=it.get("catalogoAquisicao", {}).get("codigo") if isinstance(it.get("catalogoAquisicao"), dict) else None,
             tipo_preco=tipo_preco,
-            tipo_objeto=_infer_tipo_objeto(descricao_item),
+            tipo_objeto=inferir_tipo_objeto(descricao_item),
             objeto_contratacao=objeto_contratacao,
         ))
         time.sleep(SLEEP_ENTRE_ITENS)
@@ -668,20 +668,6 @@ def _float_safe(v: Any) -> float | None:
     except (TypeError, ValueError):
         return None
 
-
-def _infer_tipo_objeto(descricao: str | None) -> str:
-    """Heuristica simples para separar material, servico e obra na ingestao."""
-    texto = (descricao or "").strip().lower()
-    if not texto:
-        return "material"
-
-    if re.search(r"(obra|engenharia|reforma|pavimenta[c?][a?]o|constru[c?][a?]o|edifica[c?][a?]o|drenagem|terraplanagem)", texto):
-        return "obra"
-
-    if re.search(r"(servi[c?]o|manuten[c?][a?]o|loca[c?][a?]o|consultoria|suporte|limpeza|transporte|vigil[?a]ncia|portaria|dedetiza[c?][a?]o|reprografia|telefonia|internet)", texto):
-        return "servico"
-
-    return "material"
 
 
 # ─────────────────────────────────────────────────────────
