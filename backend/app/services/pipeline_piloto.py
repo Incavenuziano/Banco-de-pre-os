@@ -11,7 +11,7 @@ import statistics
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from app.services.classificador_regex import ClassificadorRegex
@@ -167,18 +167,20 @@ class PipelinePiloto:
                     preco = None
 
             # Score de confiança
+            # situacaoCompraId: 1=Divulgada, 2=Homologada (com preço adjudicado)
+            qualidade = "HOMOLOGADO" if contratacao.get("situacaoCompraId") == 2 else "ESTIMADO"
             fonte_dados = {
-                "url_origem": f"https://pncp.gov.br",
+                "url_origem": "https://pncp.gov.br",
                 "data_referencia": data_pub or None,
                 "quantidade": item_raw.get("quantidade"),
-                "qualidade_tipo": "HOMOLOGADO" if contratacao.get("situacaoCompraId") == 1 else "ESTIMADO",
+                "qualidade_tipo": qualidade,
                 "storage_path": None,
                 "hash_sha256": None,
                 "unidade_normalizada": unidade_norm,
                 "categoria_id": 1 if categoria_nome else None,
                 "score_classificacao": categoria_score,
             }
-            score = calcular_score_fonte(fonte_dados)
+            score = calcular_score_fonte(fonte_dados, data_base=date.today())
 
             item = ItemProcessado(
                 numero_controle=numero_controle,

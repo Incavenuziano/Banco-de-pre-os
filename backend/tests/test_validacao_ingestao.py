@@ -226,6 +226,18 @@ class TestValidarItem:
         assert r.rejeitado
         assert "preco_ausente" in r.motivos_rejeicao
 
+    def test_preco_abaixo_de_1_centavo_rejeitado(self):
+        # Qualquer preço < R$0,01 é impossível no contexto de licitações brasileiras
+        r = validar_item("Papel A4", 0.005, 10, "UN", "2025-03-01")
+        assert r.rejeitado
+        assert any("preco_abaixo_do_minimo" in m for m in r.motivos_rejeicao)
+
+    def test_preco_exatamente_1_centavo_aceito(self):
+        # R$0,01 é o limite mínimo (aceito, porém incomum)
+        r = validar_item("Parafuso M3", 0.01, 1000, "UN", "2025-03-01")
+        # Pode gerar quarentena por preço redondo, mas não rejeição por valor mínimo
+        assert not r.rejeitado
+
     def test_quantidade_zero_rejeitada(self):
         r = validar_item("Papel A4", 25.90, 0.0, "UN", "2025-03-01")
         assert r.rejeitado
@@ -290,15 +302,15 @@ class TestValidarItem:
         assert "descricao_igual_ao_objeto_contratacao" in r.motivos_quarentena
 
     def test_preco_improvavel_para_categoria_quarentena(self):
-        # Gasolina a R$0.10/L é impossível
+        # Gasolina a R$0.10/L é impossível (abaixo da faixa R$3.50-R$10.00)
+        # R$0.10 > PRECO_MINIMO_ABSOLUTO (R$0.01), então passa pela rejeição
+        # e vai para quarentena como preco_improvavel
         r = validar_item(
             "Gasolina comum aditivada", 0.10, 100, "L", "2025-03-01",
             categoria_nome="Gasolina Comum",
         )
-        # Nota: preço 0.10 > 0, então não rejeita — vai para quarentena
-        # (a menos que seja < PRECO_MINIMO_ABSOLUTO)
-        # PRECO_MINIMO_ABSOLUTO = 0.001, então 0.10 passa a rejeição
-        assert r.em_quarentena or r.rejeitado  # depende do valor exato
+        assert r.em_quarentena
+        assert any("preco_improvavel" in m for m in r.motivos_quarentena)
 
     def test_preco_improvavel_gasolina_caro_quarentena(self):
         # Gasolina a R$50/L é impossível

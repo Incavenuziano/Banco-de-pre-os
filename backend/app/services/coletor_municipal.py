@@ -361,6 +361,7 @@ def insert_itens(
     itens: list[ItemRaw],
     uf: str = "",
     cnpj: str = "",
+    data_publicacao: str | None = None,
 ) -> tuple[int, int, int]:
     """Insere itens com portão de qualidade.
 
@@ -368,6 +369,10 @@ def insert_itens(
       - REJEITADO  → descartado, contado em `rejeitados`
       - QUARENTENA → salvo em itens_quarentena para revisão manual
       - ACEITO     → inserido normalmente em itens
+
+    Args:
+        data_publicacao: Data de publicação da contratação (YYYY-MM-DD).
+            Repassada ao portão de qualidade para validação de datas.
 
     Returns:
         Tupla (novos_validos, quarentena, rejeitados)
@@ -384,10 +389,10 @@ def insert_itens(
             preco_unitario=it.valor_unitario,
             quantidade=it.quantidade,
             unidade=it.unidade,
-            data_referencia=None,          # data vem da contratação, não do item
+            data_referencia=data_publicacao,   # data de publicação da contratação
             cnpj=cnpj or None,
             objeto_contratacao=it.objeto_contratacao,
-            categoria_nome=None,           # será classificado após insert
+            categoria_nome=None,               # classificado após insert
             tipo_preco=it.tipo_preco,
         )
 
@@ -622,6 +627,7 @@ def coletar_uf(
                         novos_itens, n_quarentena, n_rejeitados = insert_itens(
                             cur, contratacao_id, itens,
                             uf=uf, cnpj=contratacao.cnpj,
+                            data_publicacao=contratacao.data_publicacao or None,
                         )
                         resultado.novos_itens += novos_itens
                         resultado.quarentena += n_quarentena

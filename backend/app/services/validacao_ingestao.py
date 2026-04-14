@@ -86,8 +86,10 @@ class ResultadoValidacao:
 # Preço máximo absoluto aceito para qualquer item unitário (R$)
 PRECO_MAXIMO_ABSOLUTO: float = 1_000_000.0
 
-# Preço mínimo: abaixo disso provavelmente é erro de campo (ex: quantidade no lugar do preço)
-PRECO_MINIMO_ABSOLUTO: float = 0.001
+# Preço mínimo: abaixo de R$0,01 (1 centavo) provavelmente é erro de campo —
+# ex: quantidade informada no lugar do preço, ou valor sem vírgula decimal.
+# Nenhum item unitário em licitação pública brasileira custa menos de 1 centavo.
+PRECO_MINIMO_ABSOLUTO: float = 0.01
 
 # Data mínima aceitável — PNCP tem dados retroativos a 2021, mas aceitamos até 2018
 # para cobrir contratos plurianuais com referências mais antigas
